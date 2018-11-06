@@ -1,7 +1,7 @@
-# NotAClue
+# Not A Clue
 An assistant for playing the game of Clue, including both Classic and Master Detective rules.
 ## Command syntax:
-notaclue [-c *file*] [-o *file*] [*file*]
+not-a-clue [-c *file*] [-o *file*] [*file*]
 ### -c *file*
 If this option is specified, the rules and card names are loaded from the specified file. The file should hold valid a JSON object with the following elements:
 ```javascript
