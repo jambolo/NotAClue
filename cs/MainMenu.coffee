@@ -1,28 +1,54 @@
-import React from 'react'
+`
+import React, { Component } from 'react';
 
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu'
+import MenuIcon from '@material-ui/icons/Menu';
 import MenuItem from '@material-ui/core/MenuItem'
+import SetupDialog from "./SetupDialog"
+`
 
 class MainMenu extends Component
-  state =
-    anchorEl: null
+  constructor: (props) ->
+    super(props)
+    @state =
+      anchorEl: null
 
-  handleNewGame: () =>
-    console.log("MainMenu::handleNewGame")
-    @setState({ anchorEl: null });
+  handleClickMainMenu: (event) =>
+#    console.log("MainMenu::handleClickMainMenu")
+    @setState({ anchorEl: event.currentTarget })
 
-  handleClose: () =>
-    console.log("MainMenu::handleClose")
-    @setState({ anchorEl: null });
+  handleNewGame: (configuration, players) =>
+#    console.log("MainMenu::handleNewGame(#{configuration}, #{players})")
+    @setState({ anchorEl: null })
+    @props.onNewGame(configuration, players)
+
+  handleClearGame: =>
+#    console.log("MainMenu::handleClearGame")
+    @setState({ anchorEl: null })
+    @props.onClearGame()
+
+  handleClose: =>
+#    console.log("MainMenu::handleClose")
+    @setState({ anchorEl: null })
 
   render: ->
     { anchorEl } = @state
 
     <div>
-      <Menu id="main-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={@handleClose} >
-        <MenuItem onClick={@handleNewGame}>New Game</MenuItem>
-        <MenuItem onClick={@handleClose}>My account</MenuItem>
-        <MenuItem onClick={@handleClose}>Logout</MenuItem>
+      <IconButton color="inherit" aria-label="Menu" aria-owns={anchorEl ? 'main-menu' : undefined} aria-haspopup="true" onClick={@handleClickMainMenu}>
+        <MenuIcon />
+      </IconButton>
+
+      <Menu id="main-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={@handleClose}>
+        <SetupDialog
+          configurations={@props.configurations}
+          players={@props.players}
+          configuration={@props.configuration}
+          onNewGame={@handleNewGame}
+          onClose={@handleClose}
+        />
+        <MenuItem onClick={@handleClearGame}>Clear Game</MenuItem>
       </Menu>
     </div>
 

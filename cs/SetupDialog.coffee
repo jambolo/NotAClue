@@ -3,45 +3,63 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import MenuItem from '@material-ui/core/MenuItem'
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import TextField from '@material-ui/core/TextField';
 `
+ConfigurationChoices = (props) ->
+  <RadioGroup row aria-label="Versions" name="versions" value={props.configuration} onChange={props.onChange}>
+    {(<FormControlLabel key={key} value={key} control={<Radio /> } label={value.name} /> for key, value of props.configurations)}
+  </RadioGroup>
 
-class AddPlayer extends Component
+ConfigurationChooser = (props) ->
+    <FormControl component="fieldset">
+      <FormLabel component="legend">Select a version:</FormLabel>
+      <ConfigurationChoices
+        configuration={props.configuration}
+        configurations={props.configurations}
+        onChange={(event) -> props.onChange(event.target.value)}
+      />
+    </FormControl>
+
+class AddPlayerInput extends Component
   constructor: (props) ->
     super(props)
     @state = 
-      newPlayer: ''
+      player: ''
 
-  updateNewPlayer: (event) =>
-    console.log("AddPlayer::updateNewPlayer")
-    @setState({ newPlayer: event.target.value })
+  handleChange: (event) =>
+#    console.log("AddPlayerInput::handleChange")
+    @setState({ player: event.target.value })
 
   handleAddPlayer: =>
-    console.log("AddPlayer::handleAddPlayer")
-    @props.addPlayer(@state.newPlayer)
-    @setState({ newPlayer: '' })
+#    console.log("AddPlayerInput::handleAddPlayer")
+    @props.onAddPlayer(@state.player)
+    @setState({ player: '' })
 
   render: ->
     <div>
-      <TextField autoFocus margin="dense" fullWidth  value={@state.newPlayer} onChange={@updateNewPlayer} />
-      <Button onClick={@handleAddPlayer}> Add Player </Button>
+      <TextField autoFocus margin="dense" fullWidth value={@state.player} onChange={@handleChange} />
+      <Button variant="contained" color="primary" onClick={@handleAddPlayer}>Add Player</Button>
     </div>
 
-AddPlayer.propTypes =
-  addPlayer: PropTypes.func.isRequired
+AddPlayerInput.propTypes =
+  onAddPlayer: PropTypes.func.isRequired
 
-class PlayerList extends Component
-  render: ->
+PlayerList = (props) ->
     <div>
-      <h4>Players</h4>
       <ul>
-        {@props.names.map( (player) =>
-          <li> {player} </li>
+        {props.names.map( (player) =>
+          <li key={player}>{player}</li>
         )}
       </ul>
     </div>
@@ -49,25 +67,11 @@ class PlayerList extends Component
 PlayerList.defaultProps =
   names: []
 
-class Players extends Component
-  constructor: (props) ->
-    super(props)
-    @state =
-      players: []
-
-  addPlayer: (player) ->
-    console.log("Players::addPlayer")
-    @setState( (state) => ({ players: state.friends.concat([player]) }) )
-
-  handleClear: ->
-    console.log("Players::handleClear")
-    @setState( () => ({ players: [] }) )
-
-  render: ->
+Players = (props) ->
     <div>
-      <AddPlayer addPlayer={@addPlayer} />
-      <PlayerList names={@state.players} />
-      <Button onClick={@handleClear}> Clear Players </Button>
+      <AddPlayerInput onAddPlayer={props.onAddPlayer} />
+      <PlayerList names={props.players} />
+      <Button variant="contained" color="primary" onClick={props.onClearPlayers}>Clear Players</Button>
     </div>
 
 class SetupDialog extends Component
@@ -75,29 +79,61 @@ class SetupDialog extends Component
     super(props)
     @state =
       open: false
-      canceled: false
+      players: @props.players
+      configuration: @props.configuration
 
-  handleDone: () =>
-    console.log("SetupDialog::handleDone")
-    @setState({ open: false, canceled: false })
+  handleAddPlayer: (player) =>
+#    console.log("SetupDialog::handleAddPlayer(#{player})")
+    @setState({ players: @state.players.concat([player]) })
 
-  handleCancel: () =>
-    console.log("SetupDialog::handleCancel")
-    @setState({ open: false, canceled: true})
+  handleClearPlayers: =>
+#    console.log("SetupDialog::handleClearPlayers")
+    @setState({ players: [] })
+
+  handleChangeConfiguration: (configuration) =>
+#    console.log("SetupDialog::handleChangeConfiguration(#{configuration})")
+    @setState({ configuration })
+
+  handleOpen: =>
+#    console.log("SetupDialog::handleOpen")
+    @setState({ open: true })
+
+  handleDone: =>
+#    console.log("SetupDialog::handleDone")
+    @setState({ open: false })
+    @props.onNewGame(@state.configuration, @state.players)
+
+  handleCancel: =>
+#    console.log("SetupDialog::handleCancel")
+    @setState({ open: false })
+    @props.onClose()
 
   render: ->
    <div>
-      <Dialog open={@state.open} onClose={@handleCancel} aria-labelledby="form-dialog-title" >
-        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+      <MenuItem onClick={@handleOpen}>New Game</MenuItem>
+
+      <Dialog open={@state.open} aria-labelledby="form-dialog-title" onClose={@handleCancel}>
+        <DialogTitle id="form-dialog-title">New Game</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Select the version of the game and enter the names of the players.
           </DialogContentText>
-          <Players />
+          <hr />
+          <ConfigurationChooser
+            configuration={@state.configuration}
+            configurations={@props.configurations}
+            onChange={@handleChangeConfiguration}
+          />
+          <hr />
+          <Players
+            players={@state.players}
+            onAddPlayer={@handleAddPlayer}
+            onClearPlayers={@handleClearPlayers}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={@handleCancel} color="danger"> Cancel </Button>
-          <Button onClick={@handleDone} color="primary"> Done </Button>
+          <Button variant="contained" color="secondary" onClick={@handleCancel}>Cancel</Button>
+          <Button disabled={@state.players.length < 2} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
         </DialogActions>
       </Dialog>
     </div>

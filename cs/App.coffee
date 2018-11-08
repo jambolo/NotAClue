@@ -3,6 +3,9 @@ import React, { Component } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import Solver from './Solver'
+import './App.css'
+
+import Button from '@material-ui/core/Button';
 
 import TopBar from './TopBar'
 `
@@ -88,28 +91,33 @@ haunted_mansion =
     ghost: { title: "Ghosts", preposition: "",         article: "the " }
     room:  { title: "Rooms",  preposition: "in ",      article: "the " }
   cards:
-    pluto:        { name: "Pluto",            type: "guest" },
-    daisy:        { name: "Daisy Duck",       type: "guest" },
-    goofy:        { name: "Goofy",            type: "guest" },
-    donald:       { name: "Donald Duck",      type: "guest" },
-    minnie:       { name: "Minnie Mouse",     type: "guest" },
-    mickey:       { name: "Mickey Mouse",     type: "guest" },
-    prisoner:     { name: "Prisoner",         type: "ghost" },
-    singer:       { name: "Opera Singer",     type: "ghost" },
-    bride:        { name: "Bride",            type: "ghost" },
-    traveler:     { name: "Traveler",         type: "ghost" },
-    mariner:      { name: "Mariner",          type: "ghost" },
-    skeleton:     { name: "Candlestick",      type: "ghost" },
-    graveyard:    { name: "Graveyard",        type: "room"  },
-    seance:       { name: "Seance Room",      type: "room"  },
-    ballroom:     { name: "Ballroom",         type: "room"  },
-    attic:        { name: "Attic",            type: "room"  },
-    mausoleum:    { name: "Mausoleum",        type: "room"  },
-    conservatory: { name: "Conservatory",     type: "room"  },
-    library:      { name: "Library",          type: "room"  },
-    foyer:        { name: "Foyer",            type: "room"  },
-    chamber:      { name: "Portrait Chamber", type: "room"  },
+    pluto:        { name: "Pluto",            type: "guest" }
+    daisy:        { name: "Daisy Duck",       type: "guest" }
+    goofy:        { name: "Goofy",            type: "guest" }
+    donald:       { name: "Donald Duck",      type: "guest" }
+    minnie:       { name: "Minnie Mouse",     type: "guest" }
+    mickey:       { name: "Mickey Mouse",     type: "guest" }
+    prisoner:     { name: "Prisoner",         type: "ghost" }
+    singer:       { name: "Opera Singer",     type: "ghost" }
+    bride:        { name: "Bride",            type: "ghost" }
+    traveler:     { name: "Traveler",         type: "ghost" }
+    mariner:      { name: "Mariner",          type: "ghost" }
+    skeleton:     { name: "Candlestick",      type: "ghost" }
+    graveyard:    { name: "Graveyard",        type: "room"  }
+    seance:       { name: "Seance Room",      type: "room"  }
+    ballroom:     { name: "Ballroom",         type: "room"  }
+    attic:        { name: "Attic",            type: "room"  }
+    mausoleum:    { name: "Mausoleum",        type: "room"  }
+    conservatory: { name: "Conservatory",     type: "room"  }
+    library:      { name: "Library",          type: "room"  }
+    foyer:        { name: "Foyer",            type: "room"  }
+    chamber:      { name: "Portrait Chamber", type: "room"  }
   suggestion: [ "ghost", "guest", "room" ]
+
+configurations =
+  classic:          classic
+  master_detective: master_detective
+  haunted_mansion:  haunted_mansion
 
 class App extends Component
   constructor: (props) ->
@@ -120,59 +128,49 @@ class App extends Component
       solver: null
       progress: 0
 
-    @configurations =
-      classic:          classic
-      master_detective: master_detective
-      haunted_mansion:  haunted_mansion
+  handleNewGame: (configuration, players) =>
+    console.log("App::handleNewGame(#{configuration}, #{players})")
+    @setState({
+      players: players
+      configuration: configuration
+      solver: new Solver(configurations[configuration], players)
+      progress: 0
+    })
 
-  addPlayer: (player) =>
-    @setState({ players: @state.players.concat([player]) })
+  handleClearGame: =>
+    console.log("App::handleClearGame")
+    @setState({ solver: null, progress: 0 })
 
-  clearPlayers: () =>
-    @setState({ players: [] } )
-
-  setVersion: (version) =>
-    @setState({ version: version } )
-
-  newGame: () =>
-    @setState({ solver: new Solver(@configurations[@state.version], @state.players), progress: 0 })
-
-  cancelGame: () =>
-    @setState( { solver: null, progress: 0 })
-
-  hand: (playerId, cardsIds) =>
+  handleHandAction: (playerId, cardsIds) =>
+    console.log("App::handleHandAction(#{playerId}, #{cardsIds})")
     if @state.solver?
       @state.solver.hand(playerId, cardsIds) 
       @setState({ progress: @state.progress+1 })
-  show: (playerId, cardId) =>
-    if @state.solver?
-      @state.solver.show(playerId, cardId)
-      @setState({ progress: @state.progress+1 })
 
-  suggest: (playerId, cardIds, showedIds, progress) =>
+  handleSuggestAction: (playerId, cardIds, showedIds, progress) =>
+    console.log("App::handleSuggestAction(#{playerId}, #{cardIds}, #{showedIds}, #{progress})")
     if @state.solver?
       @state.solver.suggest(playerId, cardIds, showedIds, progress)
       @setState({ progress: @state.progress+1 })
 
+  handleShowAction: (playerId, cardId) =>
+    console.log("App::handleShowAction(#{playerId}, #{cardId})")
+    if @state.solver?
+      @state.solver.show(playerId, cardId)
+      @setState({ progress: @state.progress+1 })
+
   render: ->
-    <React.Fragment>
-      <CssBaseline />
-      <div className="App">
-        <TopBar
-          addPlayer={@addPlayer}
-          clearPlayers={@clearPlayers}
-          setVersion={@setVersion}
-          newGame={@newGame}
-          cancelGame={@cancelGame}
-          hand={@hand}
-          show={@show}
-          suggest={@suggest}
-          players={@state.players}
-          configuration={@state.configuration}
-          solver={@state.solver}
-          configurations={@configurations}
-        />
-      </div>
-    </React.Fragment>
+    <div className="App">
+      <TopBar
+        configurations={configurations}
+        players={@state.players}
+        configuration={@state.configuration}
+        onNewGame={@handleNewGame}
+        onClearGame={@handleClearGame}
+      />
+      <Button variant="contained" color="primary" onClick={@handleHandAction}>Hand</Button>
+      <Button variant="contained" color="primary" onClick={@handleSuggestAction}>Suggest</Button>
+      <Button variant="contained" color="primary" onClick={@handleShowAction}>Show</Button>
+    </div>
 
 export default App
