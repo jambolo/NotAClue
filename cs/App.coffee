@@ -1,6 +1,5 @@
 `
 import React, { Component } from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
 
 import Solver from './Solver'
 import './App.css'

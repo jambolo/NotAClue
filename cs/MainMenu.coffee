@@ -36,7 +36,7 @@ class MainMenu extends Component
     { anchorEl } = @state
 
     <div>
-      <IconButton color="inherit" aria-label="Menu" aria-owns={anchorEl ? 'main-menu' : undefined} aria-haspopup="true" onClick={@handleClickMainMenu}>
+      <IconButton color="inherit" onClick={@handleClickMainMenu}>
         <MenuIcon />
       </IconButton>
 

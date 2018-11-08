@@ -17,7 +17,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import TextField from '@material-ui/core/TextField';
 `
 ConfigurationChoices = (props) ->
-  <RadioGroup row aria-label="Versions" name="versions" value={props.configuration} onChange={props.onChange}>
+  <RadioGroup row name="versions" value={props.configuration} onChange={props.onChange}>
     {(<FormControlLabel key={key} value={key} control={<Radio /> } label={value.name} /> for key, value of props.configurations)}
   </RadioGroup>
 
@@ -112,7 +112,7 @@ class SetupDialog extends Component
    <div>
       <MenuItem onClick={@handleOpen}>New Game</MenuItem>
 
-      <Dialog open={@state.open} aria-labelledby="form-dialog-title" onClose={@handleCancel}>
+      <Dialog open={@state.open} onClose={@handleCancel}>
         <DialogTitle id="form-dialog-title">New Game</DialogTitle>
         <DialogContent>
           <DialogContentText>
