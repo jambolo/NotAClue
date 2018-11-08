@@ -1,12 +1,16 @@
 `
+import Solver from './Solver'
+
 import React, { Component } from 'react';
 
-import Solver from './Solver'
-import './App.css'
-
-import Button from '@material-ui/core/Button';
-
+import ConfirmDialog from './ConfirmDialog'
+import CurrentState from './CurrentState'
+import HandDialog from './HandDialog'
+import MainMenu from './MainMenu'
+import SetupDialog from './SetupDialog'
 import TopBar from './TopBar'
+import ShowDialog from './ShowDialog'
+import SuggestDialog from './SuggestDialog'
 `
 
 classic =
@@ -122,13 +126,23 @@ class App extends Component
   constructor: (props) ->
     super(props)
     @state =
-      players: []
-      configuration: "master_detective"
-      solver: null
-      progress: 0
+      players:            []
+      configuration:      "master_detective"
+      solver:             null
+      progress:           0
+      mainMenuAnchor:     null
+      handDialogOpen:     false
+      suggestDialogOpen:  false
+      showDialogOpen:     false
+      newGameDialogOpen:  false
+      confirmDialog:
+        open:      false
+        question:  ''
+        yesAction: null
+        noAction:  null
 
-  handleNewGame: (configuration, players) =>
-    console.log("App::handleNewGame(#{configuration}, #{players})")
+  newGame: (configuration, players) =>
+    console.log("App::newGame(#{configuration}, #{players})")
     @setState({
       players: players
       configuration: configuration
@@ -136,40 +150,106 @@ class App extends Component
       progress: 0
     })
 
-  handleClearGame: =>
-    console.log("App::handleClearGame")
+  clearGame: =>
+    console.log("App::clearGame")
     @setState({ solver: null, progress: 0 })
 
-  handleHandAction: (playerId, cardsIds) =>
+  recordHand: (playerId, cardsIds) =>
     console.log("App::handleHandAction(#{playerId}, #{cardsIds})")
     if @state.solver?
       @state.solver.hand(playerId, cardsIds) 
       @setState({ progress: @state.progress+1 })
 
-  handleSuggestAction: (playerId, cardIds, showedIds, progress) =>
+  recordSuggestion: (playerId, cardIds, showedIds, progress) =>
     console.log("App::handleSuggestAction(#{playerId}, #{cardIds}, #{showedIds}, #{progress})")
     if @state.solver?
       @state.solver.suggest(playerId, cardIds, showedIds, progress)
       @setState({ progress: @state.progress+1 })
 
-  handleShowAction: (playerId, cardId) =>
+  recordShown: (playerId, cardId) =>
     console.log("App::handleShowAction(#{playerId}, #{cardId})")
     if @state.solver?
       @state.solver.show(playerId, cardId)
       @setState({ progress: @state.progress+1 })
 
+  showMainMenu: (anchor) ->
+    @setState({ mainMenuAnchor: anchor })
+
+  showHandDialog: =>
+    @setState({ handDialogOpen: true })
+
+  showSuggestDialog: =>
+    @setState({ suggestDialogOpen: true })    
+
+  showShowDialog: =>
+    @setState({ showDialogOpen: true })
+
+  handleShowDialogClose: =>
+    @setState({ showDialogOpen: false })
+
+  showNewGameDialog: =>
+    @setState({ newGameDialogOpen: true })
+
+  handleNewGameDialogClose: =>
+    @setState({ newGameDialogOpen: false })
+
+  showConfirmDialog: (question, yesAction, noAction) =>
+    @setState({ confirmDialog: { open: true, question, yesAction, noAction } })
+
+  handleConfirmDialogClose: =>
+    @setState({ confirmDialog: { open: false, question: '', yesAction: null, noAction: null } })
+
   render: ->
     <div className="App">
       <TopBar
+        app={this}
+      />
+      {<CurrentState solver={@state.solver} app={this} /> if @state.solver?}
+      <MainMenu
+        anchor={@state.mainMenuAnchor}
+        onClose={() => @setState({ mainMenuAnchor: null })}
+        app={this}
+      />
+      <SetupDialog
+        open={@state.newGameDialogOpen}
         configurations={configurations}
         players={@state.players}
         configuration={@state.configuration}
-        onNewGame={@handleNewGame}
-        onClearGame={@handleClearGame}
+        onClose={@handleNewGameDialogClose}
+        app={this}
       />
-      <Button variant="contained" color="primary" onClick={@handleHandAction}>Hand</Button>
-      <Button variant="contained" color="primary" onClick={@handleSuggestAction}>Suggest</Button>
-      <Button variant="contained" color="primary" onClick={@handleShowAction}>Show</Button>
+      <HandDialog
+        open={@state.handDialogOpen}
+        configurations={configurations}
+        players={@state.players}
+        configuration={@state.configuration}
+        onClose={() => @setState({ handDialogOpen: false })}
+        app={this}
+      />
+      <SuggestDialog
+        open={@state.suggestDialogOpen}
+        configurations={configurations}
+        players={@state.players}
+        configuration={@state.configuration}
+        onClose={() => @setState({ suggestDialogOpen: false })}
+        app={this}
+      />
+      <ShowDialog
+        open={@state.showDialogOpen}
+        configurations={configurations}
+        players={@state.players}
+        configuration={@state.configuration}
+        onClose={() => @setState({ showDialogOpen: false })}
+        app={this}
+      />
+      <ConfirmDialog
+        open={@state.confirmDialog.open}
+        question={@state.confirmDialog.question}
+        yesAction={@state.confirmDialog.yesAction}
+        noAction={@state.confirmDialog.noAction}
+        onClose={() => @setState({ confirmDialog: { open: false, question: '', yesAction: null, noAction: null } })}
+        app={this}
+      />
     </div>
 
 export default App

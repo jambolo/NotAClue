@@ -11,7 +11,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import MenuItem from '@material-ui/core/MenuItem'
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import TextField from '@material-ui/core/TextField';
@@ -78,7 +77,6 @@ class SetupDialog extends Component
   constructor: (props) ->
     super(props)
     @state =
-      open: false
       players: @props.players
       configuration: @props.configuration
 
@@ -94,48 +92,39 @@ class SetupDialog extends Component
 #    console.log("SetupDialog::handleChangeConfiguration(#{configuration})")
     @setState({ configuration })
 
-  handleOpen: =>
-#    console.log("SetupDialog::handleOpen")
-    @setState({ open: true })
-
   handleDone: =>
 #    console.log("SetupDialog::handleDone")
-    @setState({ open: false })
-    @props.onNewGame(@state.configuration, @state.players)
+    @props.onClose()
+    @props.app.newGame(@state.configuration, @state.players)
 
   handleCancel: =>
 #    console.log("SetupDialog::handleCancel")
-    @setState({ open: false })
     @props.onClose()
 
   render: ->
-   <div>
-      <MenuItem onClick={@handleOpen}>New Game</MenuItem>
-
-      <Dialog open={@state.open} onClose={@handleCancel}>
-        <DialogTitle id="form-dialog-title">New Game</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Select the version of the game and enter the names of the players.
-          </DialogContentText>
-          <hr />
-          <ConfigurationChooser
-            configuration={@state.configuration}
-            configurations={@props.configurations}
-            onChange={@handleChangeConfiguration}
-          />
-          <hr />
-          <Players
-            players={@state.players}
-            onAddPlayer={@handleAddPlayer}
-            onClearPlayers={@handleClearPlayers}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" color="secondary" onClick={@handleCancel}>Cancel</Button>
-          <Button disabled={@state.players.length < 2} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+    <Dialog open={@props.open} onClose={@props.onClose}>
+      <DialogTitle id="form-dialog-title">New Game</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Select the version of the game and enter the names of the players.
+        </DialogContentText>
+        <hr />
+        <ConfigurationChooser
+          configuration={@state.configuration}
+          configurations={@props.configurations}
+          onChange={@handleChangeConfiguration}
+        />
+        <hr />
+        <Players
+          players={@state.players}
+          onAddPlayer={@handleAddPlayer}
+          onClearPlayers={@handleClearPlayers}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
+        <Button disabled={@state.players.length < 2} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+      </DialogActions>
+    </Dialog>
 
 export default SetupDialog
