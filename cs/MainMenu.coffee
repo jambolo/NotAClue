@@ -6,8 +6,8 @@ import MenuItem from '@material-ui/core/MenuItem'
 `
 
 class MainMenu extends Component
-  handleStart: (configuration, players) =>
-#    console.log("MainMenu::handleNewGame(#{configuration}, #{players})")
+  handleStart: =>
+#    console.log("MainMenu::handleStart")
     @props.onClose()
     @props.app.showNewGameDialog()
 

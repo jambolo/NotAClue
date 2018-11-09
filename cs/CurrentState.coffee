@@ -2,27 +2,45 @@
 import React, { Component } from 'react';
 
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
+import Grid from '@material-ui/core/Grid';
+import Icon from '@material-ui/core/Icon';
 `
 
 StateElement = (props) ->
-  if props.card.isHeldBy props.player
-    return <Checkbox checked color="primary" />
-  else if props.card.mightBeHeldBy props.player
-    return <Checkbox disabled checked />
+  {card, playerId} = props
+
+  if card.isHeldBy playerId
+    return <Icon>check_box</Icon>
+  else if card.mightBeHeldBy playerId
+    return <Icon>indeterminate_check_box</Icon>
   else
-    return <Checkbox disabled />
+    return <Icon>check_box_outline_blank</Icon>
+
+HeaderRow = (props) ->
+  { players } = props
+
+  <Grid container item xs={12} justify="center">
+    <Grid item xs={4}><b>Card</b></Grid>
+    {(<Grid item xs={1}><b>{playerId}</b></Grid> for playerId of players)}
+  </Grid>
 
 StateRow = (props) ->
-  <div>
-    {props.card.info.name}
-    {(<StateElement key={player} card={props.card} player={player} /> for player of props.players)}
-  </div>
+  {card, players} = props
+
+  <Grid container item xs={12} justify="center">
+    <Grid item xs={4}>
+      {card.info.name}
+    </Grid>
+    {(<Grid item xs={1}> <StateElement key={playerId} card={card} playerId={playerId} /> </Grid> for playerId of players)}
+  </Grid>
 
 StateGrid = (props) ->
-  <div>
-    {(<StateRow key={id} card={card} players={props.players} /> for id, card of props.cards)}
-  </div>
+  {cards, players} = props
+
+  <Grid container>
+    <HeaderRow players={players} />
+    {(<StateRow key={id} card={card} players={players} /> for id, card of cards)}
+  </Grid>
 
 class CurrentState extends Component
   render: ->

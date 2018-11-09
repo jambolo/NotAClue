@@ -34,7 +34,7 @@ class Player
 class Solver
   constructor: (configuration, playerIds) ->
     @ANSWER_PLAYER_ID = "ANSWER" # The answer is treated as a player
-    @rulesId = configuration.rules
+    @rulesId = configuration.rulesId
     @types = configuration.types
     @cards = {}
     @players = {}
@@ -46,8 +46,7 @@ class Solver
     cardIds = (id for id, info of configuration.cards)
 #    console.log("solver.cardIds = #{cardIds}")
 
-    playerIdsIncludingAnswer = playerIds[..]
-    playerIdsIncludingAnswer.push(@ANSWER_PLAYER_ID)
+    playerIdsIncludingAnswer = playerIds.concat(@ANSWER_PLAYER_ID)
 
     @cards[id] = new Card(playerIdsIncludingAnswer, info) for id, info of configuration.cards
     @players[p] = new Player(cardIds) for p in playerIdsIncludingAnswer

@@ -14,8 +14,10 @@ import SuggestDialog from './SuggestDialog'
 `
 
 classic =
-  name: "Classic"
-  rules: "classic"
+  name:       "Classic"
+  rulesId:    "classic"
+  minPlayers: 3
+  maxPlayers: 6
   types:
     suspect: { title: "Suspects", preposition: "",      article: ""     }
     weapon:  { title: "Weapons",  preposition: "with ", article: "the " }
@@ -47,8 +49,10 @@ classic =
 
 
 master_detective =
-  name: "Master Detective"
-  rules : "master"
+  name:       "Master Detective"
+  rulesId :   "master"
+  minPlayers: 3
+  maxPlayers: 10
   types :
     suspect: { title: "Suspects", preposition: "",      article: ""     }
     weapon:  { title: "Weapons",  preposition: "with ", article: "the " }
@@ -87,8 +91,10 @@ master_detective =
   suggestion: [ "suspect", "weapon", "room" ]
 
 haunted_mansion =
-  name: "Haunted Mansion"
-  rules: "classic"
+  name:       "Haunted Mansion"
+  rulesId:    "classic"
+  minPlayers: 3
+  maxPlayers: 6
   types:
     guest: { title: "Guests", preposition: "haunted ", article: ""     }
     ghost: { title: "Ghosts", preposition: "",         article: "the " }
@@ -126,8 +132,8 @@ class App extends Component
   constructor: (props) ->
     super(props)
     @state =
-      players:            []
-      configuration:      "master_detective"
+      playerIds:          []
+      configurationId:    "master_detective"
       solver:             null
       progress:           0
       mainMenuAnchor:     null
@@ -141,12 +147,12 @@ class App extends Component
         yesAction: null
         noAction:  null
 
-  newGame: (configuration, players) =>
-    console.log("App::newGame(#{configuration}, #{players})")
+  newGame: (configurationId, playerIds) =>
+    console.log("App::newGame(#{configurationId}, #{playerIds})")
     @setState({
-      players: players
-      configuration: configuration
-      solver: new Solver(configurations[configuration], players)
+      playerIds: playerIds
+      configurationId: configurationId
+      solver: new Solver(configurations[configurationId], playerIds)
       progress: 0
     })
 
@@ -213,32 +219,29 @@ class App extends Component
       <SetupDialog
         open={@state.newGameDialogOpen}
         configurations={configurations}
-        players={@state.players}
-        configuration={@state.configuration}
+        playerIds={@state.playerIds}
+        configurationId={@state.configurationId}
         onClose={@handleNewGameDialogClose}
         app={this}
       />
       <HandDialog
         open={@state.handDialogOpen}
-        configurations={configurations}
-        players={@state.players}
-        configuration={@state.configuration}
+        configuration={configurations[@state.configurationId]}
+        playerIds={@state.playerIds}
         onClose={() => @setState({ handDialogOpen: false })}
         app={this}
       />
       <SuggestDialog
         open={@state.suggestDialogOpen}
-        configurations={configurations}
-        players={@state.players}
-        configuration={@state.configuration}
+        configuration={configurations[@state.configurationId]}
+        playerIds={@state.playerIds}
         onClose={() => @setState({ suggestDialogOpen: false })}
         app={this}
       />
       <ShowDialog
         open={@state.showDialogOpen}
-        configurations={configurations}
-        players={@state.players}
-        configuration={@state.configuration}
+        configuration={configurations[@state.configurationId]}
+        playerIds={@state.playerIds}
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
