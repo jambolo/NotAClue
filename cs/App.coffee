@@ -1,14 +1,13 @@
 `
 import Solver from './Solver'
-
-import React, { Component } from 'react';
+import TopBar from './TopBar'
 
 import ConfirmDialog from './ConfirmDialog'
 import CurrentState from './CurrentState'
 import HandDialog from './HandDialog'
 import MainMenu from './MainMenu'
+import React, { Component } from 'react';
 import SetupDialog from './SetupDialog'
-import TopBar from './TopBar'
 import ShowDialog from './ShowDialog'
 import SuggestDialog from './SuggestDialog'
 `
@@ -161,22 +160,22 @@ class App extends Component
     @setState({ solver: null, progress: 0 })
 
   recordHand: (playerId, cardsIds) =>
-    console.log("App::handleHandAction(#{playerId}, #{cardsIds})")
+    console.log("App::recordHand(#{playerId}, [#{cardsIds}])")
     if @state.solver?
       @state.solver.hand(playerId, cardsIds) 
-      @setState({ progress: @state.progress+1 })
+      @setState((state, props) -> { progress: state.progress+1 })
 
   recordSuggestion: (playerId, cardIds, showedIds, progress) =>
-    console.log("App::handleSuggestAction(#{playerId}, #{cardIds}, #{showedIds}, #{progress})")
+    console.log("App::recordSuggestion(#{playerId}, [#{cardIds}], [#{showedIds}], #{progress})")
     if @state.solver?
       @state.solver.suggest(playerId, cardIds, showedIds, progress)
-      @setState({ progress: @state.progress+1 })
+      @setState((state, props) -> { progress: state.progress+1 })
 
   recordShown: (playerId, cardId) =>
-    console.log("App::handleShowAction(#{playerId}, #{cardId})")
+    console.log("App::recordShown(#{playerId}, #{cardId})")
     if @state.solver?
       @state.solver.show(playerId, cardId)
-      @setState({ progress: @state.progress+1 })
+      @setState((state, props) -> { progress: state.progress+1 })
 
   showMainMenu: (anchor) ->
     @setState({ mainMenuAnchor: anchor })

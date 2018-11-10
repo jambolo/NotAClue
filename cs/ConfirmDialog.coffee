@@ -21,6 +21,7 @@ class ConfirmDialog extends Component
     @props.noAction() if @props.noAction?
 
   render: ->
+    console.log("ConfirmDialog::render #{@props.open}")
     <Dialog open={@props.open} onClose={@props.onClose}>
       <DialogTitle id="form-dialog-title">Please Confirm</DialogTitle>
       <DialogContent>
@@ -30,7 +31,7 @@ class ConfirmDialog extends Component
       </DialogContent>
       <DialogActions>
         {<Button variant="contained" color="primary" onClick={@handleNo}>{if @props.yesAction? then "No" else "Cancel"}</Button> if @props.noAction?}
-        {<Button variant="contained" color="primary" onClick={@handleYes}>{if @props.noAction? then "Yes" else "Ok"}</Button> if @props.yesAction?}
+        {<Button variant="contained" color="primary" onClick={@handleYes}>{if @props.noAction? then "Yes" else "Ok"}</Button> if @props.yesAction? or not @props.noAction}
       </DialogActions>
     </Dialog>
 

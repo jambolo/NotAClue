@@ -1,5 +1,8 @@
 `
 import AppBar from '@material-ui/core/AppBar';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 
@@ -7,41 +10,48 @@ import React, { Component } from 'react';
 `
 
 GroupCardList = (props) ->
-  { group, cards } = props
+  { selectedIds, typeId, cards } = props
   <ul>
-    {(<li key={cardId}>{cards[cardId].name}</li> for cardId, checked of group when checked)}
+    {(<li key={id}> {cards[id].name} </li> for id in selectedIds when cards[id].type is typeId)}
   </ul>
 
 CardList = (props) ->
-  {cards, cardIds, types} = props
+  { selectedIds, cards, types } = props
 
   <ul>
-    {(<li key={typeId}> {types[typeId].title} <GroupCardList group={group} cards={cards} /> </li> for typeId, group of cardIds )}
+    {(<li key={typeId}> <b> {value.title} </b> <GroupCardList selectedIds={selectedIds} typeId={typeId} cards={cards} /> </li> for typeId, value of types )}
   </ul> 
 
 class CardChooser extends Component
   constructor: (props) ->
     super(props)
     @state =
-      cardIds:    {suspect: {mustard: true}, weapon: {rope: true, wrench: false}, room: {library:true, conservatory: false}}
       currentTab: 0
-    @tabIds = (id for id of @props.types)
 
   handleChangeTab: (event, currentTab) =>
+    console.log("CardChooser::handleChangeTab: (event, #{currentTab})")
     @setState({ currentTab });
 
-  handleChangeCards: (typeId, cardId) => (event) =>
-    @setState({ [typeId]: [cardId]: event.target.checked });
+  handleChangeCards: (cardId) =>
+    (event) =>
+      console.log("CardChooser::handleChangeCards: (#{cardId}, #{event.target.checked})")
+      @props.onChange(cardId, event.target.checked);
 
   render: ->
+    { value, cards, types } = @props
+    tabIds = (id for id of types)
+    tabIndex = if @state.currentTab >= 0 and @state.currentTab < tabIds.length then @state.currentTab else 0
     <div>
       <AppBar position="static">
-        <Tabs value={@state.currentTabId} onChange={@handleChangeTab}>
-          {(<Tab label={@props.types[id].name} /> for id in @tabIds)}
+        <Tabs value={tabIndex} onChange={@handleChangeTab}>
+          {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
         </Tabs>
       </AppBar>
-      Selected:
-      <CardList cards={@props.cards} cardIds={@state.cardIds} types={@props.types} />
+      <FormGroup>
+        {(<FormControlLabel key={id} control={<Checkbox checked={id in value} onChange={@handleChangeCards(id)} value={id} />} label={info.name}/> for id, info of cards when info.type is tabIds[tabIndex])}
+      </FormGroup>
+      <h1>Selected Cards:</h1>
+      <CardList selectedIds={value} cards={cards} types={types} />
     </div>
 
 export default CardChooser

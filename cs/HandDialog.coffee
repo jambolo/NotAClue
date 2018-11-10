@@ -2,7 +2,6 @@
 import CardChooser from './CardChooser'
 import PlayerChooser from './PlayerChooser'
 
-
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -16,33 +15,44 @@ class HandDialog extends Component
   constructor: (props) ->
     super(props)
     @state =
-      playerId: @props.playerIds[0]
+      playerId: null
       cardIds: []
 
   handleChangePlayer: (playerId) =>
+    console.log("HandDialog::handleChangePlayer: (#{playerId})")
     @setState({ playerId })
 
-  handleChangeCards: (cardIds) ->
-    @setState({ cardIds })
+  handleChangeCards: (cardId, selected) =>
+    console.log("HandDialog::handleChangeCards: (#{cardId}, #{selected})")
+    if selected
+      @setState((state, props) -> if cardId not in state.cardIds then { cardIds : state.cardIds.concat([cardId]) } else null) 
+    else
+      @setState((state, props) -> if cardId in state.cardIds then { cardIds : (id for id in state.cardIds when id is not cardId) } else null)
 
   handleDone: =>
-#    console.log("HandDialog::handleDone")
+    console.log("HandDialog::handleDone")
     @props.onClose()
-    @props.app.recordHand(@state.playerId, @state.cardIds)
+    if @state.playerId? and @state.cardIds.length > 0
+      @props.app.recordHand(@state.playerId, @state.cardIds)
+    else
+      @props.app.showConfirmDialog("You must select a player and at least one card")
+    @setState({ playerId: null, cardIds:[] })
 
   handleCancel: =>
-#    console.log("HandDialog::handleCancel")
+    console.log("HandDialog::handleCancel")
     @props.onClose()
+    @setState({ playerId: null, cardIds:[] })
 
   render: ->
-    <Dialog open={@props.open} onClose={@props.onClose}>
+    console.log("HandDialog::render #{@props.open}")
+    <Dialog open={@props.open} fullscreen="true" onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record Hand</DialogTitle>
       <DialogContent>
-        <PlayerChooser playerId={@state.playerId} playerIds={@props.playerIds} onChange={@handleChangePlayer} />
+        <PlayerChooser value={@state.playerId} playerIds={@props.playerIds} onChange={@handleChangePlayer} />
         <DialogContentText>
           Select the cards in the player's hand:
         </DialogContentText>
-        <CardChooser cards={@props.configuration.cards} types={@props.configuration.types} onChange={@handleChangeCards} />
+        <CardChooser value={@state.cardIds} cards={@props.configuration.cards} types={@props.configuration.types} onChange={@handleChangeCards} />
      </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>

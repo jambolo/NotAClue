@@ -81,7 +81,7 @@ class SetupDialog extends Component
 
   handleAddPlayer: (playerId) =>
 #    console.log("SetupDialog::handleAddPlayer(#{playerId})")
-    @setState({ playerIds: @state.playerIds.concat([playerId]) })
+    @setState({ (state, props) -> { playerIds: state.playerIds.concat([playerId]) } })
 
   handleClearPlayers: =>
 #    console.log("SetupDialog::handleClearPlayers")
