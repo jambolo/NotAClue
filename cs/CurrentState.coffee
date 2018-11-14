@@ -20,8 +20,8 @@ HeaderRow = (props) ->
   { players } = props
 
   <Grid container item xs={12} justify="center">
-    <Grid item xs={4}><b>Card</b></Grid>
-    {(<Grid item key={playerId} xs={1}><b>{playerId}</b></Grid> for playerId of players)}
+    <Grid item xs={4}><h4>Card</h4></Grid>
+    {(<Grid item key={playerId} xs={1}><h4>{playerId}</h4></Grid> for playerId of players)}
   </Grid>
 
 StateRow = (props) ->
@@ -31,7 +31,15 @@ StateRow = (props) ->
     <Grid item xs={4}>
       {card.info.name}
     </Grid>
-    {(<Grid item key={playerId} xs={1}> <StateElement card={card} playerId={playerId} /> </Grid> for playerId of players)}
+    {(
+      for playerId of players
+        <Grid 
+          item 
+          key={playerId} 
+          xs={1}> 
+          <StateElement card={card} playerId={playerId} /> 
+        </Grid> 
+    )}
   </Grid>
 
 StateGrid = (props) ->

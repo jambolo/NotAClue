@@ -1,6 +1,5 @@
 `
 import AppBar from '@material-ui/core/AppBar';
-import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Tab from '@material-ui/core/Tab';
@@ -9,18 +8,18 @@ import Tabs from '@material-ui/core/Tabs';
 import React, { Component } from 'react';
 `
 
-GroupCardList = (props) ->
-  { selectedIds, typeId, cards } = props
-  <ul>
-    {(<li key={id}> {cards[id].name} </li> for id in selectedIds when cards[id].type is typeId)}
-  </ul>
-
-CardList = (props) ->
-  { selectedIds, cards, types } = props
-
-  <ul>
-    {(<li key={typeId}> <b> {value.title} </b> <GroupCardList selectedIds={selectedIds} typeId={typeId} cards={cards} /> </li> for typeId, value of types )}
-  </ul> 
+CardChoices = (props) ->
+  console.log("CardChoices (render): (#{props.value}, #{props.type})")
+  <RadioGroup row name="cards" value=(props.value) onChange={props.onChange}>
+    {(
+      for id, info of props.cards when info.type is props.type
+        <FormControlLabel
+          key={id}
+          control={<Radio />} 
+          label={info.name}
+        />
+    )}
+  </RadioGroup>
 
 class CardChooser extends Component
   constructor: (props) ->
@@ -32,11 +31,6 @@ class CardChooser extends Component
     console.log("CardChooser::handleChangeTab: (event, #{currentTab})")
     @setState({ currentTab });
 
-  handleChangeCards: (cardId) =>
-    (event) =>
-      console.log("CardChooser::handleChangeCards: (#{cardId}, #{event.target.checked})")
-      @props.onChange(cardId, event.target.checked);
-
   render: ->
     { value, cards, types } = @props
     tabIds = (id for id of types)
@@ -47,11 +41,9 @@ class CardChooser extends Component
           {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
         </Tabs>
       </AppBar>
-      <FormGroup>
-        {(<FormControlLabel key={id} control={<Checkbox checked={id in value} onChange={@handleChangeCards(id)} value={id} />} label={info.name}/> for id, info of cards when info.type is tabIds[tabIndex])}
-      </FormGroup>
-      <h1>Selected Cards:</h1>
-      <CardList selectedIds={value} cards={cards} types={types} />
+      <FormControl component="fieldset">
+        <CardChoices value={value} type={tabIds[tabIndex]} onChange={(event) -> props.onChange(event.target.value)} />
+      </FormControl>
     </div>
 
 export default CardChooser

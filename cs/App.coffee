@@ -165,10 +165,10 @@ class App extends Component
       @state.solver.hand(playerId, cardsIds) 
       @setState((state, props) -> { progress: state.progress+1 })
 
-  recordSuggestion: (playerId, cardIds, showedIds, progress) =>
-    console.log("App::recordSuggestion(#{playerId}, [#{cardIds}], [#{showedIds}], #{progress})")
+  recordSuggestion: (suggesterId, cardIds, showedIds) =>
+    console.log("App::recordSuggestion(#{suggesterId}, [#{cardIds}], [#{showedIds}], #{@state.progress})")
     if @state.solver?
-      @state.solver.suggest(playerId, cardIds, showedIds, progress)
+      @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
       @setState((state, props) -> { progress: state.progress+1 })
 
   recordShown: (playerId, cardId) =>

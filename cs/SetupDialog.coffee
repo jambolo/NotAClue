@@ -23,7 +23,7 @@ ConfigurationChoices = (props) ->
 
 ConfigurationChooser = (props) ->
     <FormControl component="fieldset">
-      <FormLabel component="legend">Select a version:</FormLabel>
+      <FormLabel component="legend"><h4>Select a variation:</h4></FormLabel>
       <ConfigurationChoices
         configurationId={props.configurationId}
         configurations={props.configurations}
@@ -81,7 +81,7 @@ class SetupDialog extends Component
 
   handleAddPlayer: (playerId) =>
 #    console.log("SetupDialog::handleAddPlayer(#{playerId})")
-    @setState({ (state, props) -> { playerIds: state.playerIds.concat([playerId]) } })
+    @setState( (state, props) -> { playerIds: state.playerIds.concat([playerId]) } )
 
   handleClearPlayers: =>
 #    console.log("SetupDialog::handleClearPlayers")
@@ -114,9 +114,7 @@ class SetupDialog extends Component
           onChange={@handleChangeConfiguration}
         />
         <Divider />
-        <DialogContentText>
-          Add players:
-        </DialogContentText>
+        <DialogContentText><h4>Add players:</h4></DialogContentText>
         <Players
           playerIds={@state.playerIds}
           max={maxPlayers}

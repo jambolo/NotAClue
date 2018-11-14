@@ -7,6 +7,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Divider from '@material-ui/core/Divider';
 `
 
 class ShowDialog extends Component
@@ -25,6 +26,7 @@ class ShowDialog extends Component
         <DialogContentText>
           Do stuff
         </DialogContentText>
+        <Divider />
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
