@@ -9,7 +9,15 @@ import React from 'react';
 PlayerChoices = (props) ->
   console.log("PlayerChoices (render): (#{props.value}, [#{props.playerIds}])")
   <RadioGroup row name="players" value={props.value} onChange={props.onChange}>
-    {(<FormControlLabel key={id} value={id} control={<Radio />} label={id} /> for id in props.playerIds)}
+    {(
+      for id in props.playerIds
+        <FormControlLabel 
+          key={id} 
+          value={id} 
+          control={<Radio />} 
+          label={id} 
+        /> 
+    )}
   </RadioGroup>
 
 PlayerChooser = (props) ->

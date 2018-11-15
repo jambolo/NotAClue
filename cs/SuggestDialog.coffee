@@ -45,18 +45,28 @@ class SuggestDialog extends Component
 
   handleDone: =>
     console.log("SuggestDialog::handleDone")
-    @props.onClose()
     cardIds = (cardId for typeId, cardId of @state.cardIds)
     if @state.suggesterId? and cardIds.length == 3 and @state.showedIds.length <= 3
-      @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
+      if @state.showedIds.length > 0
+        @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
+        @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
+        @props.onClose()
+      else
+        @props.app.showConfirmDialog("Are you sure that nobody showed any cards?",
+          () =>       
+            @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
+            @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
+            @props.onClose()
+          ,
+          () -> {}
+        )
     else
       @props.app.showConfirmDialog("You must select a suggester, 3 cards, and up to 3 players who showed cards.")
-    @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
 
   handleCancel: =>
     console.log("SuggestDialog::handleCancel")
-    @props.onClose()
     @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
+    @props.onClose()
 
   render: ->
     <Dialog open={@props.open} onClose={@props.onClose}>
