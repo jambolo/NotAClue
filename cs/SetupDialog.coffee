@@ -1,7 +1,4 @@
 `
-import React, { Component } from 'react';
-import PropTypes from 'prop-types'
-
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -12,13 +9,23 @@ import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import PropTypes from 'prop-types'
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import React, { Component } from 'react';
 import TextField from '@material-ui/core/TextField';
 `
 ConfigurationChoices = (props) ->
-  <RadioGroup row name="versions" value={props.configurationId} onChange={props.onChange}>
-    {(<FormControlLabel key={key} value={key} control={<Radio /> } label={value.name} /> for key, value of props.configurations)}
+  <RadioGroup row name="variations" value={props.configurationId} onChange={props.onChange}>
+    {(
+      for key, value of props.configurations
+        <FormControlLabel 
+          key={key} 
+          value={key} 
+          control={<Radio /> } 
+          label={value.name} 
+        /> 
+    )}
   </RadioGroup>
 
 ConfigurationChooser = (props) ->
@@ -43,23 +50,31 @@ class AddPlayerInput extends Component
 
   handleAddPlayer: =>
 #    console.log("AddPlayerInput::handleAddPlayer")
-    @props.onAddPlayer(@state.playerId)
+    @props.onAddPlayer(@state.playerId) if @state.playerId != "" and @state.playerId not in @props.playerIds
     @setState({ playerId: '' })
 
   render: ->
     <div>
       <TextField autoFocus margin="normal" value={@state.playerId} onChange={@handleChange} />
-      <Button disabled={@props.count >= @props.max} variant="contained" color="primary" onClick={@handleAddPlayer}>Add</Button>
+      <Button 
+        disabled={@props.count >= @props.max} 
+        variant="contained" 
+        color="primary" 
+        onClick={@handleAddPlayer}
+      >
+        Add
+      </Button>
     </div>
 
 AddPlayerInput.propTypes =
-  onAddPlayer: PropTypes.func.isRequired
+  playerIds:    PropTypes.arrayOf(PropTypes.string).isRequired
+  count:        PropTypes.number.isRequired
+  max:          PropTypes.number.isRequired
+  onAddPlayer:  PropTypes.func.isRequired
 
 PlayerList = (props) ->
     <ul>
-      {props.names.map( (playerId) =>
-        <li key={playerId}>{playerId}</li>
-      )}
+      {props.names.map((playerId) => <li key={playerId}>{playerId}</li>)}
     </ul>
 
 PlayerList.defaultProps =
@@ -67,7 +82,12 @@ PlayerList.defaultProps =
 
 Players = (props) ->
     <div>
-      <AddPlayerInput count={props.playerIds.length} max={props.max} onAddPlayer={props.onAddPlayer} />
+      <AddPlayerInput 
+        playerIds={props.playerIds} 
+        count={props.playerIds.length} 
+        max={props.max} 
+        onAddPlayer={props.onAddPlayer} 
+      />
       <PlayerList names={props.playerIds} />
       <Button variant="contained" color="primary" onClick={props.onClearPlayers}>Clear Players</Button>
     </div>
@@ -76,7 +96,7 @@ class SetupDialog extends Component
   constructor: (props) ->
     super(props)
     @state =
-      playerIds: @props.playerIds
+      playerIds: []
       configurationId: @props.configurationId
 
   handleAddPlayer: (playerId) =>
@@ -124,7 +144,14 @@ class SetupDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button disabled={numPlayers < minPlayers} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button 
+          disabled={numPlayers < minPlayers} 
+          variant="contained" 
+          color="primary" 
+          onClick={@handleDone}
+        >
+          Done
+        </Button>
       </DialogActions>
     </Dialog>
 
