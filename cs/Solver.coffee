@@ -200,19 +200,19 @@ class Solver
 
   makeOtherDeductions: (changed) ->
     @addCardHoldersToDiscoveries()
-    changed = @checkThatAnswerHoldsOnlyOneOfEach(changed)
+    changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 
     # While something has changed, then keep re-applying all the suggestions
     while (changed)
       changed = false
       changed = @deduceFromSuggestion(s, changed) for s in @suggestions
       @addCardHoldersToDiscoveries()
-      changed = @checkThatAnswerHoldsOnlyOneOfEach(changed)
+      changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 
     @addCardHoldersToDiscoveries()
     return changed
 
-  checkThatAnswerHoldsOnlyOneOfEach: (changed) ->
+  checkThatAnswerHoldsExactlyOneOfEach: (changed) ->
     answer = @players[@ANSWER_PLAYER_ID]
 
     # Find the cards that are known to be held by the answer
@@ -229,6 +229,23 @@ class Solver
         if card.info.type is heldType and cardId isnt heldId
           @addDiscovery(@ANSWER_PLAYER_ID, cardId, false, "ANSWER can only hold one " + heldType)
           changed = @disassociatePlayerWithCard(@ANSWER_PLAYER_ID, cardId, changed)
+
+    # For each type, if there is only one card that might be held by the answer, then it must be held by the answer
+    onlyPossible = {}
+    for cardId in @ANSWER.potential
+      card = @cards[cardId]
+      if not card.isHeldBy(@ANSWER_PLAYER_ID)
+        typeId = card.info.type
+        if onlyPossible[typeId]?
+          onlyPossible[typeId].only = false
+        else 
+          onlyPossible[typeId] = { cardId: cardId, only: true }
+
+    for typeId, info of onlyPossible
+      if info.only
+          @addDiscovery(@ANSWER_PLAYER_ID, info.cardId, true, "Only " + typeId + " that ANSWER can hold")
+          changed = @associatePlayerWithCard(@ANSWER_PLAYER_ID, info.cardId, changed)
+
     return changed
 
   associatePlayerWithCard: (playerId, cardId, changed) ->
