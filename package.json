@@ -34,7 +34,7 @@
   "bugs": {
     "url": "https://github.com/jambolo/not-a-clue/issues"
   },
-  "homepage": "https://github.com/jambolo/not-a-clue#readme",
+  "homepage": ".",
   "eslintConfig": {
     "extends": "react-app"
   },
