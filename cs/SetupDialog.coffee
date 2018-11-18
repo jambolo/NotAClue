@@ -48,14 +48,29 @@ class AddPlayerInput extends Component
 #    console.log("AddPlayerInput::handleChange")
     @setState({ playerId: event.target.value })
 
+  handleKeyDown: (event) =>
+    if event.keyCode == 13
+      @handleAddPlayer()
+    return
+
   handleAddPlayer: =>
 #    console.log("AddPlayerInput::handleAddPlayer")
-    @props.onAddPlayer(@state.playerId) if @state.playerId != "" and @state.playerId not in @props.playerIds
-    @setState({ playerId: '' })
+    if @state.playerId != ""
+      if @state.playerId != "ANSWER" and @state.playerId not in @props.playerIds
+        @props.onAddPlayer(@state.playerId)
+      else
+        @props.app.showConfirmDialog("A player's name must be unique and it cannot be ANSWER.")
+      @setState({ playerId: '' })
 
   render: ->
     <div>
-      <TextField autoFocus margin="normal" value={@state.playerId} onChange={@handleChange} />
+      <TextField 
+        autoFocus 
+        margin="normal" 
+        value={@state.playerId} 
+        onChange={@handleChange}
+        onKeyDown={@handleKeyDown} 
+      />
       <Button 
         disabled={@props.count >= @props.max} 
         variant="contained" 
@@ -86,6 +101,7 @@ Players = (props) ->
         playerIds={props.playerIds} 
         count={props.playerIds.length} 
         max={props.max} 
+        app={props.app}
         onAddPlayer={props.onAddPlayer} 
       />
       <PlayerList names={props.playerIds} />
@@ -138,6 +154,7 @@ class SetupDialog extends Component
         <Players
           playerIds={@state.playerIds}
           max={maxPlayers}
+          app={@props.app}
           onAddPlayer={@handleAddPlayer}
           onClearPlayers={@handleClearPlayers}
         />
