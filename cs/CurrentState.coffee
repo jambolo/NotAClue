@@ -6,15 +6,26 @@ import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
 `
 
+Yes = (props) ->
+  <Icon>
+    {if props.playerId is "ANSWER" then "star" else "check_box"}
+  </Icon>
+
+No = (props) ->
+  ""
+
+Maybe = (props) ->
+  <Icon color="disabled">indeterminate_check_box</Icon>
+
 StateElement = (props) ->
   {card, playerId} = props
 
   if card.isHeldBy playerId
-    return <Icon>check_box</Icon>
+    <Yes playerId={playerId} />
   else if card.mightBeHeldBy playerId
-    return <Icon>indeterminate_check_box</Icon>
+    <Maybe playerId={playerId} />
   else
-    return <Icon>check_box_outline_blank</Icon>
+    <No playerId={playerId} />
 
 HeaderRow = (props) ->
   { players } = props
