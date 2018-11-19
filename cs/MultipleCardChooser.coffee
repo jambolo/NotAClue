@@ -59,12 +59,10 @@ class MultipleCardChooser extends Component
       currentTab: 0
 
   handleChangeTab: (event, currentTab) =>
-    console.log("MultipleCardChooser::handleChangeTab: (event, #{currentTab})")
     @setState({ currentTab });
 
   handleChangeCards: (cardId) =>
     (event) =>
-      console.log("MultipleCardChooser::handleChangeCards: (#{cardId}, #{event.target.checked})")
       @props.onChange(cardId, event.target.checked);
 
   render: ->

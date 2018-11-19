@@ -42,16 +42,13 @@ class Solver
     @suggestions = []
     @facts = []
 
-#    console.log("configuration.cards = " + JSON.stringify(configuration.cards, null, 2))
     cardIds = (id for id, info of configuration.cards)
-#    console.log("solver.cardIds = #{cardIds}")
 
     playerIdsIncludingAnswer = playerIds.concat(@ANSWER_PLAYER_ID)
 
     @cards[id] = new Card(playerIdsIncludingAnswer, info) for id, info of configuration.cards
     @players[p] = new Player(cardIds) for p in playerIdsIncludingAnswer
     @ANSWER = @players[@ANSWER_PLAYER_ID]
-#    console.log("solver.players = " + JSON.stringify(@players, null, 2))
 
   hand: (playerId, cardsIds) ->
     @discoveriesLog = []
@@ -92,7 +89,6 @@ class Solver
     return true
 
   playerIsValid: (playerId) ->
-#    console.log("playerIsValid: return #{playerId} isnt #{@ANSWER_PLAYER_ID} and #{playerId} of #{@players}")
     return playerId isnt @ANSWER_PLAYER_ID and playerId of @players
 
   cardsAreValid: (cardIds) ->
@@ -262,7 +258,6 @@ class Solver
     return changed
 
   disassociatePlayerWithCards: (playerId, cardIds, changed) ->
-#    console.log("disassociatePlayerWithCards: (playerId: #{playerId}, cardIds: #{cardIds}, changed: #{changed}) ->")
     changed = @disassociatePlayerWithCard(playerId, id, changed) for id in cardIds
     return changed
 
@@ -274,16 +269,12 @@ class Solver
     return @cards[cardId].info.type is type
 
   addDiscovery: (playerId, cardId, holds, reason) ->
-#    console.log("addDiscovery: (playerId: #{playerId}, cardId: #{cardId}, holds: #{holds}, reason: #{if reason? then reason else null})")
     # Check if the fact is not already known
-#    console.log("addDiscovery: (playerId: #{playerId}, cardId: #{cardId}, holds: #{holds}, reason: #{if reason? then reason else null})")
     for f in @facts
       return if f.playerId is playerId and f.cardId is cardId
 
     fact = { playerId, cardId, holds }
-#    console.log("addDiscovery: fact: #{JSON.stringify(fact)}")
     @facts.push(fact)
-#    console.log("addDiscovery: facts length = #{@facts.length}")
 
     if reason?
       cardInfo = @cards[cardId].info

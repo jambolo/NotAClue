@@ -147,7 +147,6 @@ class App extends Component
         noAction:  null
 
   newGame: (configurationId, playerIds) =>
-    console.log("App::newGame(#{configurationId}, #{playerIds})")
     @setState({
       playerIds: playerIds
       configurationId: configurationId
@@ -156,23 +155,19 @@ class App extends Component
     })
 
   clearGame: =>
-    console.log("App::clearGame")
     @setState({ solver: null, progress: 0 })
 
   recordHand: (playerId, cardsIds) =>
-    console.log("App::recordHand(#{playerId}, [#{cardsIds}])")
     if @state.solver?
       @state.solver.hand(playerId, cardsIds) 
       @setState((state, props) -> { progress: state.progress+1 })
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
-    console.log("App::recordSuggestion(#{suggesterId}, [#{cardIds}], [#{showedIds}], #{@state.progress})")
     if @state.solver?
       @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
       @setState((state, props) -> { progress: state.progress+1 })
 
   recordShown: (playerId, cardId) =>
-    console.log("App::recordShown(#{playerId}, #{cardId})")
     if @state.solver?
       @state.solver.show(playerId, cardId)
       @setState((state, props) -> { progress: state.progress+1 })

@@ -7,12 +7,10 @@ import MenuItem from '@material-ui/core/MenuItem'
 
 class MainMenu extends Component
   handleStart: =>
-#    console.log("MainMenu::handleStart")
     @props.onClose()
     @props.app.showNewGameDialog()
 
   handleClear: =>
-#    console.log("MainMenu::handleClearGame")
     @props.onClose()
     @props.app.showConfirmDialog("Are you sure you want to clear the current game?", @props.app.clearGame, () -> {})
 

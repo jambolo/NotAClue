@@ -11,7 +11,6 @@ import React, { Component } from 'react';
 `
 
 CardChoices = (props) ->
-  console.log("CardChoices (render): (#{props.value}, #{props.type})")
   <RadioGroup row name="cards" value={props.value} onChange={props.onChange}>
     {(
       for id, info of props.cards when info.type is props.type
@@ -31,7 +30,6 @@ class CardChooser extends Component
       currentTab: 0
 
   handleChangeTab: (event, currentTab) =>
-    console.log("CardChooser::handleChangeTab: (event, #{currentTab})")
     @setState({ currentTab });
 
   render: ->

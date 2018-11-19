@@ -22,7 +22,6 @@ class SuggestDialog extends Component
       showedIds: []
 
   handleChangeSuggesterId: (playerId) =>
-    console.log("HandDialog::handleChangeSuggesterId: (#{playerId})")
     @setState({ suggesterId: playerId })
 
   handleChangeCards: (typeId, cardId) =>
@@ -33,7 +32,6 @@ class SuggestDialog extends Component
     )
 
   handleChangeShowedIds: (playerId, selected) =>
-    console.log("HandDialog::handleChangeCards: (#{playerId}, #{selected})")
     if selected
       @setState((state, props) ->
         if playerId not in state.showedIds then { showedIds : state.showedIds.concat([playerId]) } else null
@@ -44,7 +42,6 @@ class SuggestDialog extends Component
       )
 
   handleDone: =>
-    console.log("SuggestDialog::handleDone")
     cardIds = (cardId for typeId, cardId of @state.cardIds)
     if @state.suggesterId? and cardIds.length == 3 and @state.showedIds.length <= 3
       if @state.showedIds.length > 0
@@ -64,7 +61,6 @@ class SuggestDialog extends Component
       @props.app.showConfirmDialog("You must select a suggester, 3 cards, and up to 3 players who showed cards.")
 
   handleCancel: =>
-    console.log("SuggestDialog::handleCancel")
     @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
     @props.onClose()
 

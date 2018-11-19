@@ -21,15 +21,12 @@ class ShowDialog extends Component
       cardId: null
 
   handleChangePlayer: (playerId) =>
-    console.log("ShowDialog::handleChangePlayer: (#{playerId})")
     @setState({ playerId })
 
   handleChangeCard: (cardId) =>
-    console.log("ShowDialog::handleChangeCard: (#{cardId})")
     @setState({ cardId })
 
   handleDone: =>
-    console.log("ShowDialog::handleDone")
     @props.onClose()
     if @state.playerId? and @state.cardId?
       @props.app.recordShown(@state.playerId, @state.cardId)
@@ -38,7 +35,6 @@ class ShowDialog extends Component
     @setState({ playerId: null, cardId: null })
 
   handleCancel: =>
-    console.log("ShowDialog::handleCancel")
     @props.onClose()
     @setState({ playerId: null, cardId: null })
 

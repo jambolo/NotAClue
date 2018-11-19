@@ -45,7 +45,6 @@ class AddPlayerInput extends Component
       playerId: ''
 
   handleChange: (event) =>
-#    console.log("AddPlayerInput::handleChange")
     @setState({ playerId: event.target.value })
 
   handleKeyDown: (event) =>
@@ -54,7 +53,6 @@ class AddPlayerInput extends Component
     return
 
   handleAddPlayer: =>
-#    console.log("AddPlayerInput::handleAddPlayer")
     if @state.playerId != ""
       if @state.playerId != "ANSWER" and @state.playerId not in @props.playerIds
         @props.onAddPlayer(@state.playerId)
@@ -116,24 +114,19 @@ class SetupDialog extends Component
       configurationId: @props.configurationId
 
   handleAddPlayer: (playerId) =>
-#    console.log("SetupDialog::handleAddPlayer(#{playerId})")
     @setState( (state, props) -> { playerIds: state.playerIds.concat([playerId]) } )
 
   handleClearPlayers: =>
-#    console.log("SetupDialog::handleClearPlayers")
     @setState({ playerIds: [] })
 
   handleChangeConfiguration: (configurationId) =>
-#    console.log("SetupDialog::handleChangeConfiguration(#{configurationId})")
     @setState({ configurationId })
 
   handleDone: =>
-#    console.log("SetupDialog::handleDone")
     @props.onClose()
     @props.app.newGame(@state.configurationId, @state.playerIds)
 
   handleCancel: =>
-#    console.log("SetupDialog::handleCancel")
     @props.onClose()
 
   render: ->

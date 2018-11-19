@@ -21,7 +21,6 @@ CardList = (props) ->
   </ul> 
 
 CardChoices = (props) ->
-  console.log("CardChoices (render): (#{props.value}, [#{props.typeId}])")
   <RadioGroup row name="cards" value={props.value} onChange={props.onChange}>
     {(
       for id, info of props.cards when info.type is props.typeId
@@ -41,12 +40,10 @@ class PerCategoryCardChooser extends Component
       currentTab: 0
 
   handleChangeTab: (event, currentTab) =>
-    console.log("CardChooser::handleChangeTab: (event, #{currentTab})")
     @setState({ currentTab });
 
   handleChangeCards: (typeId) =>
     (event) =>
-      console.log("CardChooser::handleChangeCards: (#{typeId}, #{event.target.value})")
       @props.onChange(typeId, event.target.value)
 
   render: ->

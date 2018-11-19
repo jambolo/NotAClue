@@ -8,7 +8,6 @@ import React, {Component} from 'react';
 class MultiplePlayerChooser extends Component
   handleChangeCards: (playerId) =>
     (event) =>
-      console.log("MultiplePlayerChooser::handleChangePlayers: (#{playerId}, #{event.target.checked})")
       @props.onChange(playerId, event.target.checked);
 
   render: ->

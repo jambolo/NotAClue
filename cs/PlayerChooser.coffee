@@ -7,7 +7,6 @@ import React from 'react';
 `
 
 PlayerChoices = (props) ->
-  console.log("PlayerChoices (render): (#{props.value}, [#{props.playerIds}])")
   <RadioGroup row name="players" value={props.value} onChange={props.onChange}>
     {(
       for id in props.playerIds
@@ -21,7 +20,6 @@ PlayerChoices = (props) ->
   </RadioGroup>
 
 PlayerChooser = (props) ->
-  console.log("PlayerChoooser (render): (#{props.value}, [#{props.playerIds}])")
   <FormControl component="fieldset">
     <PlayerChoices
       value={props.value}

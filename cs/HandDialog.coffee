@@ -20,11 +20,9 @@ class HandDialog extends Component
       cardIds: []
 
   handleChangePlayer: (playerId) =>
-    console.log("HandDialog::handleChangePlayer: (#{playerId})")
     @setState({ playerId })
 
   handleChangeCards: (cardId, selected) =>
-    console.log("HandDialog::handleChangeCards: (#{cardId}, #{selected})")
     if selected
       @setState((state, props) -> 
         if cardId not in state.cardIds then { cardIds : state.cardIds.concat([cardId]) } else null
@@ -35,7 +33,6 @@ class HandDialog extends Component
       )
 
   handleDone: =>
-    console.log("HandDialog::handleDone")
     @props.onClose()
     if @state.playerId? and @state.cardIds.length > 0
       @props.app.recordHand(@state.playerId, @state.cardIds)
@@ -44,12 +41,10 @@ class HandDialog extends Component
     @setState({ playerId: null, cardIds:[] })
 
   handleCancel: =>
-    console.log("HandDialog::handleCancel")
     @props.onClose()
     @setState({ playerId: null, cardIds:[] })
 
   render: ->
-    console.log("HandDialog::render #{@props.open}")
     <Dialog open={@props.open} fullscreen="true" onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record Hand</DialogTitle>
       <DialogContent>

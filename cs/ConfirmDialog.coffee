@@ -11,17 +11,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 class ConfirmDialog extends Component
   handleYes: =>
-    console.log("ConfirmDialog::handleYes")
     @props.onClose()
     @props.yesAction() if @props.yesAction?
 
   handleNo: =>
-    console.log("ConfirmDialog::handleNo")
     @props.onClose()
     @props.noAction() if @props.noAction?
 
   render: ->
-    console.log("ConfirmDialog::render #{@props.open}")
     <Dialog open={@props.open} onClose={@props.onClose}>
       <DialogTitle id="form-dialog-title">Please Confirm</DialogTitle>
       <DialogContent>
