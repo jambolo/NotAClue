@@ -42,7 +42,7 @@ class PerCategoryCardChooser extends Component
   handleChangeTab: (event, currentTab) =>
     @setState({ currentTab });
 
-  handleChangeCards: (typeId) =>
+  changeEventHandler: (typeId) =>
     (event) =>
       @props.onChange(typeId, event.target.value)
 
@@ -61,7 +61,7 @@ class PerCategoryCardChooser extends Component
         value={value[tabId]} 
         cards={cards} 
         typeId={tabId} 
-        onChange={@handleChangeCards(tabId)} 
+        onChange={@changeEventHandler(tabId)} 
       />
       <h4>Selected Cards:</h4>
       <CardList selectedIds={value} cards={cards} types={types} />

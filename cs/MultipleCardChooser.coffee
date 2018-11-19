@@ -33,24 +33,29 @@ CardList = (props) ->
     )}
   </ul> 
 
-CardChoices = (props) ->
-  <FormGroup row>
-    {(
-      for id, info of props.cards when info.type is props.type
-        <FormControlLabel
-          key={id}
-          control={
-            <Checkbox
-              checked={id in props.value}
-              disabled={id in props.excluded}
-              onChange={props.onChange(id)}
-              value={id}
-            />
-          }
-          label={info.name}
-        />
-    )}
-  </FormGroup>
+class CardChoices extends Component
+  changeEventHandler: (cardId) =>
+    (event) =>
+      @props.onChange(cardId, event.target.checked);
+
+  render: ->
+    <FormGroup row>
+      {(
+        for id, info of @props.cards when info.type is @props.type
+          <FormControlLabel
+            key={id}
+            control={
+              <Checkbox
+                checked={id in @props.value}
+                disabled={id in @props.excluded}
+                onChange={@changeEventHandler(id)}
+                value={id}
+              />
+            }
+            label={info.name}
+          />
+      )}
+    </FormGroup>
 
 class MultipleCardChooser extends Component
   constructor: (props) ->
@@ -60,10 +65,6 @@ class MultipleCardChooser extends Component
 
   handleChangeTab: (event, currentTab) =>
     @setState({ currentTab });
-
-  handleChangeCards: (cardId) =>
-    (event) =>
-      @props.onChange(cardId, event.target.checked);
 
   render: ->
     { value, cards, types, excluded } = @props
@@ -76,7 +77,7 @@ class MultipleCardChooser extends Component
           {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
         </Tabs>
       </AppBar>
-      <CardChoices value={value} cards={cards} excluded={excluded} type={tabId} onChange={@handleChangeCards} />
+      <CardChoices value={value} cards={cards} excluded={excluded} type={tabId} onChange={@props.onChange} />
       <h4>Selected Cards:</h4>
       <CardList selectedIds={value} cards={cards} types={types} />
     </div>

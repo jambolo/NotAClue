@@ -6,7 +6,7 @@ import React, {Component} from 'react';
 `
 
 class MultiplePlayerChooser extends Component
-  handleChangeCards: (playerId) =>
+  changeEventHandler: (playerId) =>
     (event) =>
       @props.onChange(playerId, event.target.checked);
 
@@ -22,7 +22,7 @@ class MultiplePlayerChooser extends Component
               <Checkbox
                 checked={id in value}
                 disabled={id in excluded}
-                onChange={@handleChangeCards(id)}
+                onChange={@changeEventHandler(id)}
                 value={id}
               />
             } label={id}
