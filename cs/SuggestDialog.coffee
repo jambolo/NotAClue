@@ -65,7 +65,7 @@ class SuggestDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@props.onClose}>
+    <Dialog open={@props.open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Suggestion</DialogTitle>
       <DialogContent>
         <DialogContentText>

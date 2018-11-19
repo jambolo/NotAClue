@@ -134,7 +134,7 @@ class SetupDialog extends Component
     minPlayers = @props.configurations[@state.configurationId].minPlayers
     maxPlayers = @props.configurations[@state.configurationId].maxPlayers
 
-    <Dialog open={@props.open} onClose={@props.onClose}>
+    <Dialog open={@props.open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">New Game</DialogTitle>
       <DialogContent>
         <ConfigurationChooser

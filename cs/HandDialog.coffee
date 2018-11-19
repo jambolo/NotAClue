@@ -33,16 +33,16 @@ class HandDialog extends Component
       )
 
   handleDone: =>
-    @props.onClose()
     if @state.playerId? and @state.cardIds.length > 0
       @props.app.recordHand(@state.playerId, @state.cardIds)
+      @setState({ playerId: null, cardIds:[] })
+      @props.onClose()
     else
       @props.app.showConfirmDialog("Error", "You must select a player and at least one card")
-    @setState({ playerId: null, cardIds:[] })
 
   handleCancel: =>
-    @props.onClose()
     @setState({ playerId: null, cardIds:[] })
+    @props.onClose()
 
   render: ->
     <Dialog open={@props.open} fullscreen="true" onClose={@handleCancel}>
