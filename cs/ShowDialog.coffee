@@ -31,7 +31,7 @@ class ShowDialog extends Component
     if @state.playerId? and @state.cardId?
       @props.app.recordShown(@state.playerId, @state.cardId)
     else
-      @props.app.showConfirmDialog("You must select a player and a card")
+      @props.app.showConfirmDialog("Error", "You must select a player and a card")
     @setState({ playerId: null, cardId: null })
 
   handleCancel: =>

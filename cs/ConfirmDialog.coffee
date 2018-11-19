@@ -20,7 +20,7 @@ class ConfirmDialog extends Component
 
   render: ->
     <Dialog open={@props.open} onClose={@props.onClose}>
-      <DialogTitle id="form-dialog-title">Please Confirm</DialogTitle>
+      <DialogTitle id="form-dialog-title">{@props.title}</DialogTitle>
       <DialogContent>
         <DialogContentText>
           {@props.question}

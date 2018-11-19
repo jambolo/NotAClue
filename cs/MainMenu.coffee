@@ -12,7 +12,7 @@ class MainMenu extends Component
 
   handleClear: =>
     @props.onClose()
-    @props.app.showConfirmDialog("Are you sure you want to clear the current game?", @props.app.clearGame, () -> {})
+    @props.app.showConfirmDialog("Please confirm", "Are you sure you want to clear the current game?", @props.app.clearGame, () -> {})
 
   render: ->
     <Menu id="main-menu" anchorEl={@props.anchor} open={Boolean(@props.anchor)} onClose={@props.onClose}>

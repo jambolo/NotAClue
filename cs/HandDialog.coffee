@@ -37,7 +37,7 @@ class HandDialog extends Component
     if @state.playerId? and @state.cardIds.length > 0
       @props.app.recordHand(@state.playerId, @state.cardIds)
     else
-      @props.app.showConfirmDialog("You must select a player and at least one card")
+      @props.app.showConfirmDialog("Error", "You must select a player and at least one card")
     @setState({ playerId: null, cardIds:[] })
 
   handleCancel: =>

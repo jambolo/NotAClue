@@ -142,6 +142,7 @@ class App extends Component
       newGameDialogOpen:  false
       confirmDialog:
         open:      false
+        title:     ''
         question:  ''
         yesAction: null
         noAction:  null
@@ -193,11 +194,11 @@ class App extends Component
   handleNewGameDialogClose: =>
     @setState({ newGameDialogOpen: false })
 
-  showConfirmDialog: (question, yesAction, noAction) =>
-    @setState({ confirmDialog: { open: true, question, yesAction, noAction } })
+  showConfirmDialog: (title, question, yesAction, noAction) =>
+    @setState({ confirmDialog: { open: true, title, question, yesAction, noAction } })
 
   handleConfirmDialogClose: =>
-    @setState({ confirmDialog: { open: false, question: '', yesAction: null, noAction: null } })
+    @setState({ confirmDialog: { open: false, title: '', question: '', yesAction: null, noAction: null } })
 
   render: ->
     <div className="App">
@@ -241,6 +242,7 @@ class App extends Component
       />
       <ConfirmDialog
         open={@state.confirmDialog.open}
+        title={@state.confirmDialog.title}
         question={@state.confirmDialog.question}
         yesAction={@state.confirmDialog.yesAction}
         noAction={@state.confirmDialog.noAction}

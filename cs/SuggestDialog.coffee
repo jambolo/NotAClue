@@ -49,7 +49,7 @@ class SuggestDialog extends Component
         @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
         @props.onClose()
       else
-        @props.app.showConfirmDialog("Are you sure that nobody showed any cards?",
+        @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed any cards?",
           () =>       
             @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
             @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
@@ -58,7 +58,7 @@ class SuggestDialog extends Component
           () -> {}
         )
     else
-      @props.app.showConfirmDialog("You must select a suggester, 3 cards, and up to 3 players who showed cards.")
+      @props.app.showConfirmDialog("Error", "You must select a suggester, 3 cards, and up to 3 players who showed cards.")
 
   handleCancel: =>
     @setState({ suggesterId: null, cardIds: {}, showedIds: [] })

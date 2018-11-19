@@ -57,7 +57,7 @@ class AddPlayerInput extends Component
       if @state.playerId != "ANSWER" and @state.playerId not in @props.playerIds
         @props.onAddPlayer(@state.playerId)
       else
-        @props.app.showConfirmDialog("A player's name must be unique and it cannot be ANSWER.")
+        @props.app.showConfirmDialog("Error", "A player's name must be unique and it cannot be ANSWER.")
       @setState({ playerId: '' })
 
   render: ->
