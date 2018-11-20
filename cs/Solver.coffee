@@ -5,10 +5,10 @@ class Card
     @holders = @holders.filter (h) -> h isnt playerId
 
   mightBeHeldBy: (playerId) ->
-    return playerId in @holders
+    playerId in @holders
 
   isHeldBy: (playerId) ->
-    return @holders.length is 1 and @holders[0] is playerId
+    @holders.length is 1 and @holders[0] is playerId
 
 class Player
   constructor: (cardIds) ->
@@ -17,19 +17,11 @@ class Player
   remove: (cardId) ->
     @potential = @potential.filter (c) -> c isnt cardId
 
+  doesNotHold: (cardId) ->
+    cardId not in @potential
 
   mightHold: (cardId) ->
-    return cardId in @potential
-
-  mustHoldOne: (cardIds) ->
-    count = 0
-    held = null
-    for c in cardIds
-      if @mightHold(c)
-        ++count
-        return null if count > 1 # Early out -- might hold more than one, so no
-        held = c         # Assuming for now that none of the others are held
-    return held
+    cardId in @potential
 
 class Solver
   constructor: (configuration, playerIds) ->
@@ -40,6 +32,7 @@ class Solver
     @players = {}
     @discoveriesLog = []
     @suggestions = []
+    @accusations = []
     @facts = []
 
     cardIds = (id for id, info of configuration.cards)
@@ -49,6 +42,17 @@ class Solver
     @cards[id] = new Card(playerIdsIncludingAnswer, info) for id, info of configuration.cards
     @players[p] = new Player(cardIds) for p in playerIdsIncludingAnswer
     @ANSWER = @players[@ANSWER_PLAYER_ID]
+
+  accuse: (playerId, cardIds, outcome) ->
+    @discoveriesLog = []
+
+    accusation = { playerId, cardIds, outcome }
+    @accusations.push(accusation)
+
+    changed = false
+    changed = @deduceFromAccusation(accusation, changed)
+    changed = @makeOtherDeductions(changed)
+    return changed
 
   hand: (playerId, cardsIds) ->
     @discoveriesLog = []
@@ -77,6 +81,29 @@ class Solver
     changed = @makeOtherDeductions(changed)
     return changed
 
+  # If the player must hold one of the cards, but we know it doesn't hold all but one, then that one must be the one that is held
+  playerMustHoldOne: (playerId, cardIds) ->
+    player = @players[playerId]
+    count = 0
+    held = null
+    for id in cardIds
+      if player.mightHold(id)
+        ++count
+        return null if count > 1 # Early out -- might hold more than one, so not all-but-one
+        held = id
+    return held
+
+  # If the player must not hold one of the cards, but we know it holds all but one, then that one is the one it doesn't hold
+  playerMustNotHoldOne: (playerId, cardIds) ->
+    count = 0
+    notHeld = null
+    for id in cardIds
+      if not @cards[id].isHeldBy(playerId)
+        ++count
+        return null if count > 1 # Early out -- more than one card is not held, so not all-but-one
+        notHeld = id
+    return notHeld
+
   cardsThatMightBeHeldBy: (playerId) ->
     return @players[playerId].potential
 
@@ -84,16 +111,16 @@ class Solver
     return @cards[cardId].holders
 
   playersAreValid: (playerIds) ->
-    for p in playerIds
-      return false if not @playerIsValid(p)
+    for id in playerIds
+      return false if not @playerIsValid(id)
     return true
 
   playerIsValid: (playerId) ->
     return playerId isnt @ANSWER_PLAYER_ID and playerId of @players
 
   cardsAreValid: (cardIds) ->
-    for c in cardIds
-      return false if not @cardIsValid(c)
+    for id in cardIds
+      return false if not @cardIsValid(id)
     return true
 
   cardIsValid: (cardId) ->
@@ -101,6 +128,28 @@ class Solver
 
   typeIsValid: (typeId) ->
     return typeId in @types
+
+  deduceFromAccusation: (accusation, changed) ->
+    { playerId, cardIds, outcome } = accusation
+
+    # You can deduce from an accusation that:
+    #    The accuser does not have the cards in the accusation.
+    #    If the accusation is correct, then those are the cards.
+    #    If the accusation is incorrect, then
+    #      If two of the cards are held by the answer, then it must not hold the third
+
+    @addDiscoveries(playerId, cardIds, false, "made an accusation with these cards")
+    changed = @disassociatePlayerWithCards(playerId, cardIds, changed)
+
+    if outcome
+      for cardId in cardIds
+        changed = @associatePlayerWithCard(@ANSWER_PLAYER_ID, cardId, changed)
+    else
+      mustNotHoldId = @playerMustNotHoldOne(@ANSWER_PLAYER_ID, cardIds)
+      if mustNotHoldId isnt null
+        @addDiscovery(@ANSWER_PLAYER_ID, mustNotHoldId, false, "the accusation was wrong but the answer holds the others")
+        changed = @disassociatePlayerWithCard(@ANSWER_PLAYER_ID, mustNotHoldId, changed)
+    return changed
 
   deduceFromSuggestion: (suggestion, changed) ->
     if @rulesId == "master"
@@ -135,7 +184,7 @@ class Solver
     # You can deduce from a suggestion that:
     #    If nobody showed a card, then none of the players (except possibly the suggester or the answer) have the cards.
     #    Only the last player in the showed list might hold any of the suggested cards.
-    #    If the player that showed a card does not hold all but one of the cards, the player must hold the one.
+    #    If the player that showed a card does not hold two of the cards, then the player must hold the third.
 
     if showedIds is null or showedIds.length == 0
       for playerId of @players
@@ -152,8 +201,7 @@ class Solver
       # The last player showed a card.
       # If the player does not hold all but one of cards, the player must hold the one.
       playerId = showedIds[showedIds.length - 1]
-      player = @players[playerId]
-      mustHoldId = player.mustHoldOne(cardIds)
+      mustHoldId = @playerMustHoldOne(playerId, cardIds)
       if mustHoldId isnt null
         @addDiscovery(playerId, mustHoldId, true, "showed a card in suggestion #" + id + ", and does not hold the others")
         changed = @associatePlayerWithCard(playerId, mustHoldId, changed)
@@ -170,12 +218,12 @@ class Solver
     #    If a player (other than the answer and suggester) does not show a card, the player has none of the suggested cards.
     #    If all suggested cards are shown, then the answer and the suggester hold none of the suggested cards.
 
-    for playerId, player of @players
+    for playerId of @players
 
       # If the player showed a card ...
       if playerId in showedIds
         # ..., then if the player does not hold all but one of the cards, the player must hold the one.
-        mustHoldId = player.mustHoldOne(cardIds)
+        mustHoldId = @playerMustHoldOne(playerId, cardIds)
         if mustHoldId isnt null
           @addDiscovery(playerId, mustHoldId, true, "showed a card in suggestion #" + id + ", and does not hold the others")
           changed = @associatePlayerWithCard(playerId, mustHoldId, changed)
@@ -198,10 +246,11 @@ class Solver
     @addCardHoldersToDiscoveries()
     changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 
-    # While something has changed, then keep re-applying all the suggestions
+    # While something has changed, then keep re-applying all the suggestions and accusations
     while (changed)
       changed = false
       changed = @deduceFromSuggestion(s, changed) for s in @suggestions
+      changed = @deduceFromAccusation(a, changed) for a in @accusations
       @addCardHoldersToDiscoveries()
       changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 

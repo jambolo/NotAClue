@@ -68,6 +68,10 @@ class LogDialog extends Component
     cards = @configuration.cards
     "#{info.player} showed #{cardPhrase(cards[info.card], @configuration, false)}."
 
+  describeAccuse: (info) =>
+    "#{info.accuser} accused #{suggestedCardsClause(info.cards, @configuration)}.
+     The accusation was #{if info.outcome then "" else "not "}correct."
+
   describeEntry: (entry) =>
     if entry.setup?
       @describeSetup(entry.setup)
@@ -77,6 +81,8 @@ class LogDialog extends Component
       @describeSuggest(entry.suggest)
     else if entry.show?
       @describeShow(entry.show)
+    else if entry.accuse?
+      @describeAccuse(entry.accuse)
     else
       alert("Unknown log entry")
 

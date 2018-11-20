@@ -2,6 +2,7 @@
 import Solver from './Solver'
 import TopBar from './TopBar'
 
+import AccuseDialog from './AccuseDialog'
 import Button from '@material-ui/core/Button';
 import ConfirmDialog from './ConfirmDialog'
 import CurrentState from './CurrentState'
@@ -142,6 +143,7 @@ class App extends Component
       handDialogOpen:     false
       suggestDialogOpen:  false
       showDialogOpen:     false
+      accuseDialogOpen:   false
       newGameDialogOpen:  false
       confirmDialog:
         open:      false
@@ -192,6 +194,18 @@ class App extends Component
       }
     )
 
+  logAccuseEntry: (accuserId, cardIds, outcome) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          accuse:
+            accuser: accuserId
+            cards:   cardIds
+            outcome: outcome
+        }])
+      }
+    )
+
   newGame: (configurationId, playerIds) =>
     @setState({
       playerIds:       playerIds
@@ -218,6 +232,11 @@ class App extends Component
       @state.solver.show(playerId, cardId)
       @logShowEntry(playerId, cardId)
 
+  recordAccusation: (accuserId, cardIds, outcome) =>
+    if @state.solver?
+      @state.solver.accuse(accuserId, cardIds, outcome)
+      @logAccuseEntry(accuserId, cardIds, outcome)
+
   showMainMenu: (anchor) ->
     @setState({ mainMenuAnchor: anchor })
 
@@ -232,6 +251,9 @@ class App extends Component
 
   showShowDialog: =>
     @setState({ showDialogOpen: true })
+
+  showAccuseDialog: =>
+    @setState({ accuseDialogOpen: true })
 
   showLog: =>
     @setState({ logDialogOpen: true })
@@ -266,6 +288,7 @@ class App extends Component
             <Button variant="contained" color="primary" onClick={@showHandDialog}>Hand</Button>
             <Button variant="contained" color="primary" onClick={@showSuggestDialog}>Suggest</Button>
             <Button variant="contained" color="primary" onClick={@showShowDialog}>Show</Button>
+            <Button variant="contained" color="primary" onClick={@showAccuseDialog}>Accuse</Button>
             <Divider />
             <CurrentState solver={@state.solver} app={this} /> 
           </div>
@@ -303,6 +326,13 @@ class App extends Component
         configuration={configurations[@state.configurationId]}
         playerIds={@state.playerIds}
         onClose={() => @setState({ showDialogOpen: false })}
+        app={this}
+      />
+      <AccuseDialog
+        open={@state.accuseDialogOpen}
+        configuration={configurations[@state.configurationId]}
+        playerIds={@state.playerIds}
+        onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />
       <LogDialog
