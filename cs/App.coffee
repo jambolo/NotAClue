@@ -5,6 +5,7 @@ import TopBar from './TopBar'
 import ConfirmDialog from './ConfirmDialog'
 import CurrentState from './CurrentState'
 import HandDialog from './HandDialog'
+import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
 import React, { Component } from 'react';
 import SetupDialog from './SetupDialog'
@@ -43,7 +44,7 @@ classic =
     lounge:       { name: "Lounge",          type: "room"    }
     ballroom:     { name: "Ballroom",        type: "room"    }
     hall:         { name: "Hall",            type: "room"    }
-  suggestion: [ "suspect", "weapon", "room" ]
+  suggestionOrder: [ "suspect", "weapon", "room" ]
 
 
 
@@ -87,7 +88,7 @@ master_detective =
     carriage:     { name: "Carriage House",    type: "room"    }
     trophy:       { name: "Trophy Room",       type: "room"    }
     fountain:     { name: "Fountain",          type: "room"    }
-  suggestion: [ "suspect", "weapon", "room" ]
+  suggestionOrder: [ "suspect", "weapon", "room" ]
 
 haunted_mansion =
   name:       "Haunted Mansion"
@@ -120,7 +121,7 @@ haunted_mansion =
     library:      { name: "Library",          type: "room"  }
     foyer:        { name: "Foyer",            type: "room"  }
     chamber:      { name: "Portrait Chamber", type: "room"  }
-  suggestion: [ "ghost", "guest", "room" ]
+  suggestionOrder: [ "ghost", "guest", "room" ]
 
 configurations =
   classic:          classic
@@ -134,7 +135,7 @@ class App extends Component
       playerIds:          []
       configurationId:    "master_detective"
       solver:             null
-      progress:           0
+      log:                []
       mainMenuAnchor:     null
       handDialogOpen:     false
       suggestDialogOpen:  false
@@ -146,35 +147,80 @@ class App extends Component
         question:  ''
         yesAction: null
         noAction:  null
+      logDialogOpen:       false
+
+  setupLogEntry: (configurationId, playerIds) ->
+    { 
+      setup:
+        variation: configurationId
+        players:   playerIds
+    }
+
+  logHandEntry: (playerId, cardIds) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          hand:
+            player: playerId
+            cards:  cardIds
+        }])
+      }
+    )
+
+  logSuggestEntry: (suggesterId, cardIds, showedIds) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          suggest:
+            suggester: suggesterId
+            cards: cardIds
+            showed: showedIds
+        }])
+      }
+    )
+
+  logShowEntry: (playerId, cardId) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          show:
+              player: playerId
+              card: cardId
+        }])
+      }
+    )
 
   newGame: (configurationId, playerIds) =>
     @setState({
-      playerIds: playerIds
+      playerIds:       playerIds
       configurationId: configurationId
-      solver: new Solver(configurations[configurationId], playerIds)
-      progress: 0
+      solver:          new Solver(configurations[configurationId], playerIds)
+      log:             [@setupLogEntry(configurationId, playerIds)]
     })
 
   clearGame: =>
-    @setState({ solver: null, progress: 0 })
+    @setState({ solver: null, progress: 0 , log: []})
 
-  recordHand: (playerId, cardsIds) =>
+  recordHand: (playerId, cardIds) =>
     if @state.solver?
-      @state.solver.hand(playerId, cardsIds) 
-      @setState((state, props) -> { progress: state.progress+1 })
+      @state.solver.hand(playerId, cardIds) 
+      @logHandEntry(playerId, cardIds)
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @state.solver?
       @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
-      @setState((state, props) -> { progress: state.progress+1 })
+      @logSuggestEntry(suggesterId, cardIds, showedIds)
 
   recordShown: (playerId, cardId) =>
     if @state.solver?
       @state.solver.show(playerId, cardId)
-      @setState((state, props) -> { progress: state.progress+1 })
+      @logShowEntry(playerId, cardId)
 
   showMainMenu: (anchor) ->
     @setState({ mainMenuAnchor: anchor })
+
+  showNewGameDialog: =>
+    @setState({ newGameDialogOpen: true })
 
   showHandDialog: =>
     @setState({ handDialogOpen: true })
@@ -185,20 +231,29 @@ class App extends Component
   showShowDialog: =>
     @setState({ showDialogOpen: true })
 
-  handleShowDialogClose: =>
-    @setState({ showDialogOpen: false })
-
-  showNewGameDialog: =>
-    @setState({ newGameDialogOpen: true })
-
-  handleNewGameDialogClose: =>
-    @setState({ newGameDialogOpen: false })
+  showLog: =>
+    @setState({ logDialogOpen: true })
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
-    @setState({ confirmDialog: { open: true, title, question, yesAction, noAction } })
+    @setState({ 
+      confirmDialog: {
+        open: true
+        title
+        question
+        yesAction
+        noAction
+      }
+    })
 
   handleConfirmDialogClose: =>
-    @setState({ confirmDialog: { open: false, title: '', question: '', yesAction: null, noAction: null } })
+    @setState({ 
+      confirmDialog: 
+        open:      false
+        title:     ''
+        question:  ''
+        yesAction: null
+        noAction:  null 
+    })
 
   render: ->
     <div className="App">
@@ -208,6 +263,7 @@ class App extends Component
       {<CurrentState solver={@state.solver} app={this} /> if @state.solver?}
       <MainMenu
         anchor={@state.mainMenuAnchor}
+        enableShowLog={@state.log? and @state.log.length > 0}
         onClose={() => @setState({ mainMenuAnchor: null })}
         app={this}
       />
@@ -216,7 +272,7 @@ class App extends Component
         configurations={configurations}
         playerIds={@state.playerIds}
         configurationId={@state.configurationId}
-        onClose={@handleNewGameDialogClose}
+        onClose={() => @setState({ newGameDialogOpen: false })}
         app={this}
       />
       <HandDialog
@@ -240,13 +296,20 @@ class App extends Component
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
+      <LogDialog
+        open={@state.logDialogOpen}
+        log={@state.log}
+        configurations={configurations}
+        onClose={() => @setState({ logDialogOpen: false })}
+        app={this}
+      />
       <ConfirmDialog
         open={@state.confirmDialog.open}
         title={@state.confirmDialog.title}
         question={@state.confirmDialog.question}
         yesAction={@state.confirmDialog.yesAction}
         noAction={@state.confirmDialog.noAction}
-        onClose={() => @setState({ confirmDialog: { open: false, question: '', yesAction: null, noAction: null } })}
+        onClose={@handleConfirmDialogClose}
         app={this}
       />
     </div>
