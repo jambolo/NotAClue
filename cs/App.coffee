@@ -2,8 +2,10 @@
 import Solver from './Solver'
 import TopBar from './TopBar'
 
+import Button from '@material-ui/core/Button';
 import ConfirmDialog from './ConfirmDialog'
 import CurrentState from './CurrentState'
+import Divider from '@material-ui/core/Divider'
 import HandDialog from './HandDialog'
 import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
@@ -173,8 +175,8 @@ class App extends Component
         log: state.log.concat([{
           suggest:
             suggester: suggesterId
-            cards: cardIds
-            showed: showedIds
+            cards:     cardIds
+            showed:    showedIds
         }])
       }
     )
@@ -185,7 +187,7 @@ class App extends Component
         log: state.log.concat([{
           show:
               player: playerId
-              card: cardId
+              card:   cardId
         }])
       }
     )
@@ -257,10 +259,17 @@ class App extends Component
 
   render: ->
     <div className="App">
-      <TopBar
-        app={this}
-      />
-      {<CurrentState solver={@state.solver} app={this} /> if @state.solver?}
+      <TopBar app={this} />
+      {
+        if @state.solver?
+          <div>
+            <Button variant="contained" color="primary" onClick={@showHandDialog}>Hand</Button>
+            <Button variant="contained" color="primary" onClick={@showSuggestDialog}>Suggest</Button>
+            <Button variant="contained" color="primary" onClick={@showShowDialog}>Show</Button>
+            <Divider />
+            <CurrentState solver={@state.solver} app={this} /> 
+          </div>
+      }
       <MainMenu
         anchor={@state.mainMenuAnchor}
         enableShowLog={@state.log? and @state.log.length > 0}

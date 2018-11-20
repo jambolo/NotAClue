@@ -1,8 +1,7 @@
 `
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Icon from '@material-ui/core/Icon';
-import React, { Component } from 'react';
+import React from 'react';
 `
 
 Yes = (props) ->
@@ -52,22 +51,12 @@ StateRow = (props) ->
     )}
   </Grid>
 
-StateGrid = (props) ->
-  {cards, players} = props
+CurrentState = (props) ->
+  { cards, players } = props.solver
 
   <Grid container>
     <HeaderRow players={players} />
     {(<StateRow key={id} card={card} players={players} /> for id, card of cards)}
   </Grid>
-
-class CurrentState extends Component
-  render: ->
-    <div>
-      <Button variant="contained" color="primary" onClick={@props.app.showHandDialog}>Hand</Button>
-      <Button variant="contained" color="primary" onClick={@props.app.showSuggestDialog}>Suggest</Button>
-      <Button variant="contained" color="primary" onClick={@props.app.showShowDialog}>Show</Button>
-      <hr />
-      <StateGrid cards={@props.solver.cards} players={@props.solver.players} />
-    </div>
 
 export default CurrentState

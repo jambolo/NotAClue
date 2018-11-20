@@ -14,8 +14,8 @@ import React, { Component } from 'react';
 cardPhrase = (card, configuration, usePreposition = true) ->
   type = configuration.types[card.type]
   phrase = ""
-  phrase += type.preposition + " " if usePreposition and type.preposition.length > 0
-  phrase += type.article + " " if type.article.length > 0
+  phrase += type.preposition if usePreposition
+  phrase += type.article
   phrase += card.name
   return phrase
 
@@ -61,7 +61,8 @@ class LogDialog extends Component
     "#{info.player} has #{cardList(info.cards, @configuration)}."
 
   describeSuggest: (info) =>
-    "#{info.suggester} suggested #{suggestedCardsClause(info.cards, @configuration)}. #{playerList(info.showed)} showed a card."
+    "#{info.suggester} suggested #{suggestedCardsClause(info.cards, @configuration)}.
+     #{playerList(info.showed)} showed a card."
 
   describeShow: (info) =>
     cards = @configuration.cards
