@@ -48,7 +48,7 @@ class AddPlayerInput extends Component
     @setState({ playerId: event.target.value })
 
   handleKeyDown: (event) =>
-    if event.keyCode == 13
+    if event.keyCode == 13 and @props.count < @props.max
       @handleAddPlayer()
     return
 
