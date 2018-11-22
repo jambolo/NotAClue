@@ -7,24 +7,26 @@ import React from 'react';
 `
 
 PlayerChoices = (props) ->
-  <RadioGroup row name="players" value={props.value} onChange={props.onChange}>
-    {(
-      for id in props.playerIds
+  { value, players, onChange } = props
+  <RadioGroup row name="players" value={value} onChange={onChange}>
+    {
+      for id in players
         <FormControlLabel 
           key={id} 
           value={id} 
           control={<Radio />} 
           label={id} 
         /> 
-    )}
+    }
   </RadioGroup>
 
 PlayerChooser = (props) ->
+  { value, players, onChange } = props
   <FormControl component="fieldset">
     <PlayerChoices
-      value={props.value}
-      playerIds={props.playerIds}
-      onChange={(event) -> props.onChange(event.target.value)}
+      value={value}
+      players={players}
+      onChange={(event) -> onChange(event.target.value)}
     />
   </FormControl>
 

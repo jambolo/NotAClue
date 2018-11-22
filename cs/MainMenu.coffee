@@ -18,10 +18,11 @@ class MainMenu extends Component
     @props.onClose()
 
   render: ->
-    <Menu id="main-menu" anchorEl={@props.anchor} open={Boolean(@props.anchor)} onClose={@props.onClose}>
+    { anchor, enableShowLog, onClose} = @props
+    <Menu id="main-menu" anchorEl={anchor} open={Boolean(anchor)} onClose={onClose}>
       <MenuItem onClick={@handleStart}>Start New Game</MenuItem>
       <MenuItem onClick={@handleClear}>Clear Current Game</MenuItem>
-      <MenuItem disabled={not @props.enableShowLog} onClick={@handleLog}>Show Log</MenuItem>
+      <MenuItem disabled={not enableShowLog} onClick={@handleLog}>Show Log</MenuItem>
     </Menu>
 
 export default MainMenu

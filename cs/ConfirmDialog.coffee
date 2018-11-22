@@ -18,16 +18,17 @@ class ConfirmDialog extends Component
     @props.noAction() if @props.noAction?
 
   render: ->
-    <Dialog open={@props.open} onClose={@props.onClose}>
-      <DialogTitle id="form-dialog-title">{@props.title}</DialogTitle>
+    { open, title, question, yesAction, noAction } = @props
+    <Dialog disableBackdropClick disableEscapeKeyDown open={open} onClose={@handleNo}>
+      <DialogTitle id="form-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {@props.question}
+          {question}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        {<Button variant="contained" color="primary" onClick={@handleNo}>{if @props.yesAction? then "No" else "Cancel"}</Button> if @props.noAction?}
-        {<Button variant="contained" color="primary" onClick={@handleYes}>{if @props.noAction? then "Yes" else "Ok"}</Button> if @props.yesAction? or not @props.noAction}
+        {<Button variant="contained" color="primary" onClick={@handleNo}>{if yesAction? then "No" else "Cancel"}</Button> if noAction?}
+        {<Button variant="contained" color="primary" onClick={@handleYes}>{if noAction? then "Yes" else "Ok"}</Button> if yesAction? or not noAction}
       </DialogActions>
     </Dialog>
 

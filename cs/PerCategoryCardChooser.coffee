@@ -9,27 +9,28 @@ import Tabs from '@material-ui/core/Tabs';
 `
 
 CardList = (props) ->
-  { selectedIds, cards, types } = props
+  { selected, cards, types } = props
   <ul>
-    {(
+    {
       for typeId, value of types
         <li key={typeId}>
-          <b> {value.title}: </b> {cards[selectedIds[typeId]].name if selectedIds[typeId]?}
+          <b>{value.title}</b>: {cards[selected[typeId]].name if selected[typeId]?}
         </li>
-    )}
+    }
   </ul> 
 
 CardChoices = (props) ->
-  <RadioGroup row name="cards" value={props.value} onChange={props.onChange}>
-    {(
-      for id, info of props.cards when info.type is props.typeId
+  { value, type, cards, onChange } = props
+  <RadioGroup row name="cards" value={value} onChange={onChange}>
+    {
+      for id, info of cards when info.type is type
         <FormControlLabel 
           key={id} 
           value={id} 
           control={<Radio />} 
           label={info.name} 
         /> 
-    )}
+    }
   </RadioGroup>
 
 class PerCategoryCardChooser extends Component
@@ -41,7 +42,7 @@ class PerCategoryCardChooser extends Component
   handleChangeTab: (event, currentTab) =>
     @setState({ currentTab });
 
-  changeEventHandler: (typeId) =>
+  makeChangeEventHandler: (typeId) =>
     (event) =>
       @props.onChange(typeId, event.target.value)
 
@@ -50,20 +51,21 @@ class PerCategoryCardChooser extends Component
     tabIds = (id for id of types)
     tabIndex = if @state.currentTab >= 0 and @state.currentTab < tabIds.length then @state.currentTab else 0
     tabId = tabIds[tabIndex]
+    
     <div>
       <AppBar position="static">
         <Tabs value={tabIndex} onChange={@handleChangeTab}>
-          {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
+          {<Tab key={id} label={types[id].title} /> for id in tabIds}
         </Tabs>
       </AppBar>
       <CardChoices 
         value={value[tabId]} 
         cards={cards} 
-        typeId={tabId} 
-        onChange={@changeEventHandler(tabId)} 
+        type={tabId} 
+        onChange={@makeChangeEventHandler(tabId)} 
       />
-      <h4>Selected Cards:</h4>
-      <CardList selectedIds={value} cards={cards} types={types} />
+      <b>Selected Cards:</b>
+      <CardList selected={value} cards={cards} types={types} />
     </div>
 
 export default PerCategoryCardChooser

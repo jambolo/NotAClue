@@ -45,18 +45,18 @@ class HandDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} fullscreen="true" onClose={@handleCancel}>
-      <DialogTitle id="form-dialog-title">Record Hand</DialogTitle>
+    { open, players, configuration } = @props
+    <Dialog open={open} fullscreen="true" onClose={@handleCancel}>
+      <DialogTitle id="form-dialog-title">Record Your Hand</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Which player are you?</Typography>
-        <PlayerChooser value={@state.playerId} playerIds={@props.playerIds} onChange={@handleChangePlayer} />
+        <PlayerChooser value={@state.playerId} players={players} onChange={@handleChangePlayer} />
         <Divider />
         <Typography variant="h6">Select the cards in your hand:</Typography>
         <MultipleCardChooser 
           value={@state.cardIds} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
-          excluded={[]} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCards} 
         />
       </DialogContent>

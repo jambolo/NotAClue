@@ -8,7 +8,6 @@ import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import PropTypes from 'prop-types'
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import React, { Component } from 'react';
@@ -16,8 +15,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 `
 ConfigurationChoices = (props) ->
-  <RadioGroup row name="variations" value={props.configurationId} onChange={props.onChange}>
-    {(
+  <RadioGroup row name="variations" value={props.configuration} onChange={props.onChange}>
+    {
       for key, value of props.configurations
         <FormControlLabel 
           key={key} 
@@ -25,18 +24,18 @@ ConfigurationChoices = (props) ->
           control={<Radio /> } 
           label={value.name} 
         /> 
-    )}
+    }
   </RadioGroup>
 
 ConfigurationChooser = (props) ->
-    <FormControl component="fieldset">
-      <FormLabel component="legend"><h4>Select a variation:</h4></FormLabel>
-      <ConfigurationChoices
-        configurationId={props.configurationId}
-        configurations={props.configurations}
-        onChange={(event) -> props.onChange(event.target.value)}
-      />
-    </FormControl>
+  <FormControl component="fieldset">
+    <FormLabel component="legend"><Typography variant="h6">Select a variation:</Typography></FormLabel>
+    <ConfigurationChoices
+      configuration={props.configuration}
+      configurations={props.configurations}
+      onChange={(event) -> props.onChange(event.target.value)}
+    />
+  </FormControl>
 
 class AddPlayerInput extends Component
   constructor: (props) ->
@@ -54,7 +53,7 @@ class AddPlayerInput extends Component
 
   handleAddPlayer: =>
     if @state.playerId != ""
-      if @state.playerId != "ANSWER" and @state.playerId not in @props.playerIds
+      if @state.playerId != "ANSWER" and @state.playerId not in @props.players
         @props.onAddPlayer(@state.playerId)
       else
         @props.app.showConfirmDialog("Error", "A player's name must be unique and it cannot be ANSWER.")
@@ -79,32 +78,24 @@ class AddPlayerInput extends Component
       </Button>
     </div>
 
-AddPlayerInput.propTypes =
-  playerIds:    PropTypes.arrayOf(PropTypes.string).isRequired
-  count:        PropTypes.number.isRequired
-  max:          PropTypes.number.isRequired
-  onAddPlayer:  PropTypes.func.isRequired
-
 PlayerList = (props) ->
-    <ul>
-      {props.names.map((playerId) => <li key={playerId}>{playerId}</li>)}
-    </ul>
+  <ul>
+    {props.names.map((playerId) => <li key={playerId}> {playerId} </li>)}
+  </ul>
 
-PlayerList.defaultProps =
-  names: []
-
-Players = (props) ->
-    <div>
-      <AddPlayerInput 
-        playerIds={props.playerIds} 
-        count={props.playerIds.length} 
-        max={props.max} 
-        app={props.app}
-        onAddPlayer={props.onAddPlayer} 
-      />
-      <PlayerList names={props.playerIds} />
-      <Button variant="contained" color="primary" onClick={props.onClearPlayers}>Clear Players</Button>
-    </div>
+AddPlayers = (props) ->
+  { players, max, app, onAddPlayer, onClearPlayers } = props
+  <div>
+    <AddPlayerInput 
+      players={players} 
+      count={players.length} 
+      max={max} 
+      app={app}
+      onAddPlayer={onAddPlayer} 
+    />
+    <PlayerList names={players} />
+    <Button variant="contained" color="primary" onClick={onClearPlayers}>Clear Players</Button>
+  </div>
 
 class SetupDialog extends Component
   constructor: (props) ->
@@ -123,31 +114,32 @@ class SetupDialog extends Component
     @setState({ configurationId })
 
   handleDone: =>
-    @props.onClose()
     @props.app.newGame(@state.configurationId, @state.playerIds)
+    @props.onClose()
 
   handleCancel: =>
     @props.onClose()
 
   render: ->
+    { open, configurations, app } = @props
     numPlayers = @state.playerIds.length
-    minPlayers = @props.configurations[@state.configurationId].minPlayers
-    maxPlayers = @props.configurations[@state.configurationId].maxPlayers
+    minPlayers = configurations[@state.configurationId].minPlayers
+    maxPlayers = configurations[@state.configurationId].maxPlayers
 
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">New Game</DialogTitle>
       <DialogContent>
         <ConfigurationChooser
-          configurationId={@state.configurationId}
-          configurations={@props.configurations}
+          configuration={@state.configurationId}
+          configurations={configurations}
           onChange={@handleChangeConfiguration}
         />
         <Divider />
         <Typography variant="h6">Add players:</Typography>
-        <Players
-          playerIds={@state.playerIds}
+        <AddPlayers
+          players={@state.playerIds}
           max={maxPlayers}
-          app={@props.app}
+          app={app}
           onAddPlayer={@handleAddPlayer}
           onClearPlayers={@handleClearPlayers}
         />

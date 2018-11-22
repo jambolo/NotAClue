@@ -6,15 +6,15 @@ import React, {Component} from 'react';
 `
 
 class MultiplePlayerChooser extends Component
-  changeEventHandler: (playerId) =>
-    (event) =>
-      @props.onChange(playerId, event.target.checked);
 
-  render: ->
-    { value, playerIds, excluded } = @props
+  makeChangeHandler: (id) =>
+    (event) => @props.onChange(id, event.target.checked)
+
+  render:->
+    { value, players, excluded } = @props
     <FormGroup row>
-      {(
-        for id in playerIds
+      {
+        for id in players
           <FormControlLabel
             key={id}
             value={id}
@@ -22,12 +22,12 @@ class MultiplePlayerChooser extends Component
               <Checkbox
                 checked={id in value}
                 disabled={id in excluded}
-                onChange={@changeEventHandler(id)}
+                onChange={@makeChangeHandler(id)}
                 value={id}
               />
             } label={id}
           />
-      )}
+      }
     </FormGroup>
 
 export default MultiplePlayerChooser

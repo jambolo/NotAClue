@@ -302,7 +302,6 @@ class App extends Component
       <SetupDialog
         open={@state.newGameDialogOpen}
         configurations={configurations}
-        playerIds={@state.playerIds}
         configurationId={@state.configurationId}
         onClose={() => @setState({ newGameDialogOpen: false })}
         app={this}
@@ -310,28 +309,28 @@ class App extends Component
       <HandDialog
         open={@state.handDialogOpen}
         configuration={configurations[@state.configurationId]}
-        playerIds={@state.playerIds}
+        players={@state.playerIds}
         onClose={() => @setState({ handDialogOpen: false })}
         app={this}
       />
       <SuggestDialog
         open={@state.suggestDialogOpen}
         configuration={configurations[@state.configurationId]}
-        playerIds={@state.playerIds}
+        players={@state.playerIds}
         onClose={() => @setState({ suggestDialogOpen: false })}
         app={this}
       />
       <ShowDialog
         open={@state.showDialogOpen}
         configuration={configurations[@state.configurationId]}
-        playerIds={@state.playerIds}
+        players={@state.playerIds}
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
       <AccuseDialog
         open={@state.accuseDialogOpen}
         configuration={configurations[@state.configurationId]}
-        playerIds={@state.playerIds}
+        players={@state.playerIds}
         onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />

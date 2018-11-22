@@ -38,20 +38,21 @@ class ShowDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    { open, players, configuration } = @props
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Shown Card</DialogTitle>
       <DialogContent>
         <Typography variant="h4">Who showed the card?</Typography>
         <PlayerChooser 
           value={@state.playerId} 
-          playerIds={@props.playerIds} 
+          players={players} 
           onChange={@handleChangePlayer} />
         <Divider />
         <Typography variant="h4">What card did they show?</Typography>
         <CardChooser
           value={@state.cardId} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCard} 
         />
       </DialogContent>

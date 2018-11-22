@@ -10,16 +10,17 @@ import Tabs from '@material-ui/core/Tabs';
 `
 
 CardChoices = (props) ->
-  <RadioGroup row name="cards" value={props.value} onChange={props.onChange}>
-    {(
-      for id, info of props.cards when info.type is props.type
+  { value, type, cards, onChange } = props
+  <RadioGroup row name="cards" value={value} onChange={onChange}>
+    {
+      for id, info of cards when info.type is type
         <FormControlLabel
           key={id}
           value={id}
           control={<Radio />} 
           label={info.name}
         />
-    )}
+    }
   </RadioGroup>
 
 class CardChooser extends Component
@@ -39,7 +40,7 @@ class CardChooser extends Component
     <div>
       <AppBar position="static">
         <Tabs value={tabIndex} onChange={@handleChangeTab}>
-          {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
+          {<Tab key={id} label={types[id].title} /> for id in tabIds}
         </Tabs>
       </AppBar>
       <FormControl component="fieldset">

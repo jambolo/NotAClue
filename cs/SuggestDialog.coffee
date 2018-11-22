@@ -65,24 +65,25 @@ class SuggestDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    { open, players, configuration } = @props
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Suggestion</DialogTitle>
       <DialogContent>
         <Typography variant="h4"> Who made the suggestion? </Typography>
-        <PlayerChooser value={@state.suggesterId} playerIds={@props.playerIds} onChange={@handleChangeSuggesterId} />
+        <PlayerChooser value={@state.suggesterId} players={players} onChange={@handleChangeSuggesterId} />
         <Divider />
         <Typography variant="h4"> What cards were suggested? </Typography>
         <PerCategoryCardChooser 
           value={@state.cardIds} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCards} 
         />
         <Divider />
         <Typography variant="h4"> Who showed cards?</Typography>
         <MultiplePlayerChooser 
           value={@state.showedIds} 
-          playerIds={@props.playerIds} 
+          players={players} 
           excluded={if @state.suggesterId isnt null then [@state.suggesterId] else []} 
           onChange={@handleChangeShowedIds} 
         />

@@ -51,17 +51,18 @@ class AccuseDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    { open, configuration, players } = @props
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record An Accusation</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Who made the accusation?</Typography>
-        <PlayerChooser value={@state.accuserId} playerIds={@props.playerIds} onChange={@handleChangeAccuserId} />
+        <PlayerChooser value={@state.accuserId} players={players} onChange={@handleChangeAccuserId} />
         <Divider />
         <Typography variant="h6">What was the accusation?</Typography>
         <PerCategoryCardChooser 
           value={@state.cardIds} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCards} 
         />
         <Divider />

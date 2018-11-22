@@ -83,17 +83,18 @@ class LogDialog extends Component
       alert("Unknown log entry")
 
   render: ->
-    @configuration = if @props.log[0]? then @props.configurations[@props.log[0].setup.variation] else null
+    { open, log, configurations, onClose } = @props
+    @configuration = if log[0]? and log[0].setup? then configurations[log[0].setup.variation] else null
 
-    <Dialog open={@props.open} fullscreen="true" onClose={@props.onClose}>
+    <Dialog open={open} fullscreen="true" onClose={onClose}>
       <DialogTitle id="form-dialog-title">Log</DialogTitle>
       <DialogContent>
         <ol>
-          {<li key={step}> {@describeEntry(entry)} </li> for entry, step in @props.log}
+          {<li key={step}> {@describeEntry(entry)} </li> for entry, step in log}
         </ol>
      </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="primary" onClick={@props.onClose}>Done</Button>
+        <Button variant="contained" color="primary" onClick={onClose}>Done</Button>
       </DialogActions>
     </Dialog>
 

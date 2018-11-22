@@ -9,51 +9,45 @@ import Tabs from '@material-ui/core/Tabs';
 `
 
 GroupedCardList = (props) ->
-  { selectedIds, typeId, cards } = props
+  { selected, type, cards } = props
   <ul>
-    {(
-      for id in selectedIds when cards[id].type is typeId
-        <li key={id}>
-          {cards[id].name}
-        </li>
-    )}
+    {<li key={id}> {cards[id].name} </li> for id in selected when cards[id].type is type}
   </ul>
 
 CardList = (props) ->
-  { selectedIds, cards, types } = props
-
+  { selected, cards, types } = props
   <ul>
-    {(
+    {
       for typeId, value of types
         <li key={typeId}>
-          <b> {value.title} </b>
-          <GroupedCardList selectedIds={selectedIds} typeId={typeId} cards={cards} />
+          <b>{value.title}</b>
+          <GroupedCardList selected={selected} type={typeId} cards={cards} />
         </li>
-    )}
+    }
   </ul> 
 
 class CardChoices extends Component
-  changeEventHandler: (cardId) =>
-    (event) =>
-      @props.onChange(cardId, event.target.checked);
+  makeChangeHandler: (id) =>
+    (event) => @props.onChange(id, event.target.checked)
 
   render: ->
+    { value, cards, excluded, type } = @props
     <FormGroup row>
-      {(
-        for id, info of @props.cards when info.type is @props.type
+      {
+        for id, info of cards when info.type is type
           <FormControlLabel
             key={id}
             control={
               <Checkbox
-                checked={id in @props.value}
-                disabled={id in @props.excluded}
-                onChange={@changeEventHandler(id)}
+                checked={id in value}
+                disabled={excluded? and id in excluded}
+                onChange={@makeChangeHandler(id)}
                 value={id}
               />
             }
             label={info.name}
           />
-      )}
+      }
     </FormGroup>
 
 class MultipleCardChooser extends Component
@@ -66,19 +60,20 @@ class MultipleCardChooser extends Component
     @setState({ currentTab });
 
   render: ->
-    { value, cards, types, excluded } = @props
+    { value, cards, types, excluded, onChange } = @props
     tabIds = (id for id of types)
     tabIndex = if @state.currentTab >= 0 and @state.currentTab < tabIds.length then @state.currentTab else 0
     tabId = tabIds[tabIndex]
+
     <div>
       <AppBar position="static">
         <Tabs value={tabIndex} onChange={@handleChangeTab}>
-          {(<Tab key={id} label={types[id].title} /> for id in tabIds)}
+          {<Tab key={id} label={types[id].title} /> for id in tabIds}
         </Tabs>
       </AppBar>
-      <CardChoices value={value} cards={cards} excluded={excluded} type={tabId} onChange={@props.onChange} />
-      <h4>Selected Cards:</h4>
-      <CardList selectedIds={value} cards={cards} types={types} />
+      <CardChoices value={value} cards={cards} excluded={excluded} type={tabId} onChange={onChange} />
+      <b>Selected Cards:</b>
+      <CardList selected={value} cards={cards} types={types} />
     </div>
 
 export default MultipleCardChooser
