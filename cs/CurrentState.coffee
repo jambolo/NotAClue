@@ -6,20 +6,20 @@ import React from 'react';
 
 Yes = (props) ->
   <Icon>
-    {if props.player is "ANSWER" then "star" else "check_box"}
+    {if props.isAnswer then "star" else "check_box"}
   </Icon>
 
-No = (props) ->
+No = () ->
   ""
 
-Maybe = (props) ->
+Maybe = () ->
   <Icon color="disabled">indeterminate_check_box</Icon>
 
 StateElement = (props) ->
   { card, player } = props
 
   if card.isHeldBy player
-    <Yes player={player} />
+    <Yes isAnswer={player is "ANSWER"} />
   else if card.mightBeHeldBy player
     <Maybe />
   else
@@ -38,7 +38,12 @@ StateRow = (props) ->
 
   <Grid container item xs={12} justify="center">
     <Grid item xs={4}>
-      {card.info.name}
+      {
+        if card.isHeldBy("ANSWER")
+          <b> {card.info.name} </b>
+        else
+          card.info.name
+      }
     </Grid>
     {
       for playerId of players
