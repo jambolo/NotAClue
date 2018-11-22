@@ -19,6 +19,9 @@ class ShowDialog extends Component
       playerId: null
       cardId: null
 
+  stateIsOk: ->
+    @state.playerId? and @state.cardId?
+
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
 
@@ -26,7 +29,7 @@ class ShowDialog extends Component
     @setState({ cardId })
 
   handleDone: =>
-    if @state.playerId? and @state.cardId?
+    if @stateIsOk()
       @props.app.recordShown(@state.playerId, @state.cardId)
       @setState({ playerId: null, cardId: null })
       @props.onClose()
@@ -58,7 +61,7 @@ class ShowDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 
