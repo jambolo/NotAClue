@@ -21,6 +21,10 @@ class SuggestDialog extends Component
       cardIds: {}
       showedIds: []
 
+  stateIsOk: ->
+    cardCount = (key for key of @state.cardIds).length
+    return @state.suggesterId? and cardCount == 3 and @state.showedIds.length <= 3
+
   handleChangeSuggesterId: (playerId) =>
     @setState({ suggesterId: playerId })
 
@@ -42,8 +46,8 @@ class SuggestDialog extends Component
       )
 
   handleDone: =>
-    cardIds = (cardId for typeId, cardId of @state.cardIds)
-    if @state.suggesterId? and cardIds.length == 3 and @state.showedIds.length <= 3
+    if @stateIsOk()
+      cardIds = (cardId for typeId, cardId of @state.cardIds)
       if @state.showedIds.length > 0
         @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
         @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
@@ -90,7 +94,7 @@ class SuggestDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 
