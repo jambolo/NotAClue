@@ -19,6 +19,9 @@ class HandDialog extends Component
       playerId: null
       cardIds: []
 
+  stateIsOk: ->
+    @state.playerId? and @state.cardIds.length > 0
+
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
 
@@ -33,7 +36,7 @@ class HandDialog extends Component
       )
 
   handleDone: =>
-    if @state.playerId? and @state.cardIds.length > 0
+    if @stateIsOk()
       @props.app.recordHand(@state.playerId, @state.cardIds)
       @setState({ playerId: null, cardIds:[] })
       @props.onClose()
@@ -62,7 +65,7 @@ class HandDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 
