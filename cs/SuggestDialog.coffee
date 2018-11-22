@@ -7,10 +7,10 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import React, { Component } from 'react';
+import Typography from '@material-ui/core/Typography'
 `
 
 class SuggestDialog extends Component
@@ -68,14 +68,10 @@ class SuggestDialog extends Component
     <Dialog open={@props.open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Suggestion</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          <h4>Who made the suggestion?</h4>
-        </DialogContentText>
+        <Typography variant="h4"> Who made the suggestion? </Typography>
         <PlayerChooser value={@state.suggesterId} playerIds={@props.playerIds} onChange={@handleChangeSuggesterId} />
         <Divider />
-        <DialogContentText>
-          <h4>What cards were suggested?</h4>
-        </DialogContentText>
+        <Typography variant="h4"> What cards were suggested? </Typography>
         <PerCategoryCardChooser 
           value={@state.cardIds} 
           cards={@props.configuration.cards} 
@@ -83,9 +79,7 @@ class SuggestDialog extends Component
           onChange={@handleChangeCards} 
         />
         <Divider />
-        <DialogContentText>
-          <h4>Who showed cards?</h4>
-        </DialogContentText>
+        <Typography variant="h4"> Who showed cards?</Typography>
         <MultiplePlayerChooser 
           value={@state.showedIds} 
           playerIds={@props.playerIds} 

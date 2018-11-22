@@ -6,7 +6,6 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
@@ -14,6 +13,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import React, { Component } from 'react';
+import Typography from '@material-ui/core/Typography'
 `
 
 class AccuseDialog extends Component
@@ -54,14 +54,10 @@ class AccuseDialog extends Component
     <Dialog open={@props.open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record An Accusation</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          <h4>Who made the accusation?</h4>
-        </DialogContentText>
+        <Typography variant="h6">Who made the accusation?</Typography>
         <PlayerChooser value={@state.accuserId} playerIds={@props.playerIds} onChange={@handleChangeAccuserId} />
         <Divider />
-        <DialogContentText>
-          <h4>What was the accusation?</h4>
-        </DialogContentText>
+        <Typography variant="h6">What was the accusation?</Typography>
         <PerCategoryCardChooser 
           value={@state.cardIds} 
           cards={@props.configuration.cards} 
@@ -69,9 +65,7 @@ class AccuseDialog extends Component
           onChange={@handleChangeCards} 
         />
         <Divider />
-        <DialogContentText>
-          <h4>Was the accusation correct?</h4>
-        </DialogContentText>
+        <Typography variant="h6">Was the accusation correct?</Typography>
         <FormControl component="fieldset">
           <RadioGroup row name="outcome" value={@state.outcome} onChange={@handleChangeOutcome}>
             <FormControlLabel value={"yes"} control={<Radio />}  label="Yes" /> 

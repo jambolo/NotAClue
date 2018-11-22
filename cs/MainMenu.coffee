@@ -1,8 +1,7 @@
 `
-import React, { Component } from 'react';
-
 import Menu from '@material-ui/core/Menu'
 import MenuItem from '@material-ui/core/MenuItem'
+import React, { Component } from 'react';
 `
 
 class MainMenu extends Component
