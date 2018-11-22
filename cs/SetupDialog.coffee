@@ -79,9 +79,9 @@ class AddPlayerInput extends Component
     </div>
 
 PlayerList = (props) ->
-  <ul>
+  <ol>
     {props.names.map((playerId) => <li key={playerId}> {playerId} </li>)}
-  </ul>
+  </ol>
 
 AddPlayers = (props) ->
   { players, max, app, onAddPlayer, onClearPlayers } = props
@@ -135,7 +135,7 @@ class SetupDialog extends Component
           onChange={@handleChangeConfiguration}
         />
         <Divider />
-        <Typography variant="h6">Add players:</Typography>
+        <Typography variant="h6">{ if maxPlayers > 0 then "Add up to #{maxPlayers} players:" else "Add players:"}</Typography>
         <AddPlayers
           players={@state.playerIds}
           max={maxPlayers}
