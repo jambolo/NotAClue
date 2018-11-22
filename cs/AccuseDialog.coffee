@@ -24,6 +24,10 @@ class AccuseDialog extends Component
       cardIds:   {}
       outcome:   null
 
+  stateIsOk: ->
+    cardCount = (key for key of @state.cardIds).length
+    return @state.accuserId? and cardCount == 3 and @state.outcome?
+
   handleChangeAccuserId: (playerId) =>
     @setState({ accuserId: playerId })
 
@@ -38,8 +42,8 @@ class AccuseDialog extends Component
     @setState({ outcome: event.target.value })
 
   handleDone: =>
-    cardIds = (cardId for typeId, cardId of @state.cardIds)
-    if @state.accuserId? and cardIds.length == 3 and @state.outcome?
+    if @stateIsOk()
+      cardIds = (cardId for typeId, cardId of @state.cardIds)
       @props.app.recordAccusation(@state.accuserId, cardIds, @state.outcome == "yes")
       @setState({ accuserId: null, cardIds: {}, outcome: null })
       @props.onClose()
@@ -76,7 +80,7 @@ class AccuseDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 
