@@ -302,7 +302,6 @@ class App extends Component
       <SetupDialog
         open={@state.newGameDialogOpen}
         configurations={configurations}
-        configurationId={@state.configurationId}
         onClose={() => @setState({ newGameDialogOpen: false })}
         app={this}
       />

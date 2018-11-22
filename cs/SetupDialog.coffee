@@ -102,7 +102,7 @@ class SetupDialog extends Component
     super(props)
     @state =
       playerIds: []
-      configurationId: @props.configurationId
+      configurationId: null
 
   handleAddPlayer: (playerId) =>
     @setState( (state, props) -> { playerIds: state.playerIds.concat([playerId]) } )
@@ -123,8 +123,8 @@ class SetupDialog extends Component
   render: ->
     { open, configurations, app } = @props
     numPlayers = @state.playerIds.length
-    minPlayers = configurations[@state.configurationId].minPlayers
-    maxPlayers = configurations[@state.configurationId].maxPlayers
+    minPlayers = if @state.configurationId then configurations[@state.configurationId].minPlayers else 0
+    maxPlayers = if @state.configurationId then configurations[@state.configurationId].maxPlayers else 0
 
     <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">New Game</DialogTitle>
@@ -147,7 +147,7 @@ class SetupDialog extends Component
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
         <Button 
-          disabled={numPlayers < minPlayers} 
+          disabled={not @state.configurationId? or numPlayers < minPlayers} 
           variant="contained" 
           color="primary" 
           onClick={@handleDone}
