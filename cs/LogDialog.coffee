@@ -3,11 +3,7 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import React, { Component } from 'react';
 `
 
@@ -87,21 +83,18 @@ class LogDialog extends Component
       alert("Unknown log entry")
 
   render: ->
-    @configuration = if @props.log[0]? then @props.configurations[@props.log[0].setup.variation] else null
+    { open, log, configurations, onClose } = @props
+    @configuration = if log[0]? and log[0].setup? then configurations[log[0].setup.variation] else null
 
-    <Dialog open={@props.open} fullscreen="true" onClose={@props.onClose}>
+    <Dialog open={open} fullscreen="true" onClose={onClose}>
       <DialogTitle id="form-dialog-title">Log</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          <List component="ol" dense>
-            {(
-              <ListItem ><ListItemText primary={@describeEntry(entry)} /></ListItem> for entry in @props.log
-            )}
-          </List>
-        </DialogContentText>
+        <ol>
+          {<li key={step}> {@describeEntry(entry)} </li> for entry, step in log}
+        </ol>
      </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="primary" onClick={@props.onClose}>Done</Button>
+        <Button variant="contained" color="primary" onClick={onClose}>Done</Button>
       </DialogActions>
     </Dialog>
 

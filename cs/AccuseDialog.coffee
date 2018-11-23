@@ -6,7 +6,6 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
@@ -14,6 +13,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import React, { Component } from 'react';
+import Typography from '@material-ui/core/Typography'
 `
 
 class AccuseDialog extends Component
@@ -23,6 +23,10 @@ class AccuseDialog extends Component
       accuserId: null
       cardIds:   {}
       outcome:   null
+
+  stateIsOk: ->
+    cardCount = (key for key of @state.cardIds).length
+    return @state.accuserId? and cardCount == 3 and @state.outcome?
 
   handleChangeAccuserId: (playerId) =>
     @setState({ accuserId: playerId })
@@ -38,8 +42,8 @@ class AccuseDialog extends Component
     @setState({ outcome: event.target.value })
 
   handleDone: =>
-    cardIds = (cardId for typeId, cardId of @state.cardIds)
-    if @state.accuserId? and cardIds.length == 3 and @state.outcome?
+    if @stateIsOk()
+      cardIds = (cardId for typeId, cardId of @state.cardIds)
       @props.app.recordAccusation(@state.accuserId, cardIds, @state.outcome == "yes")
       @setState({ accuserId: null, cardIds: {}, outcome: null })
       @props.onClose()
@@ -51,27 +55,22 @@ class AccuseDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    { open, configuration, players } = @props
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record An Accusation</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          <h4>Who made the accusation?</h4>
-        </DialogContentText>
-        <PlayerChooser value={@state.accuserId} playerIds={@props.playerIds} onChange={@handleChangeAccuserId} />
+        <Typography variant="h6">Who made the accusation?</Typography>
+        <PlayerChooser value={@state.accuserId} players={players} onChange={@handleChangeAccuserId} />
         <Divider />
-        <DialogContentText>
-          <h4>What was the accusation?</h4>
-        </DialogContentText>
+        <Typography variant="h6">What was the accusation?</Typography>
         <PerCategoryCardChooser 
           value={@state.cardIds} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCards} 
         />
         <Divider />
-        <DialogContentText>
-          <h4>Was the accusation correct?</h4>
-        </DialogContentText>
+        <Typography variant="h6">Was the accusation correct?</Typography>
         <FormControl component="fieldset">
           <RadioGroup row name="outcome" value={@state.outcome} onChange={@handleChangeOutcome}>
             <FormControlLabel value={"yes"} control={<Radio />}  label="Yes" /> 
@@ -81,7 +80,7 @@ class AccuseDialog extends Component
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 

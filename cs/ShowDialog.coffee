@@ -6,11 +6,10 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
-
 import React, { Component } from 'react';
+import Typography from '@material-ui/core/Typography'
 `
 
 class ShowDialog extends Component
@@ -20,6 +19,9 @@ class ShowDialog extends Component
       playerId: null
       cardId: null
 
+  stateIsOk: ->
+    @state.playerId? and @state.cardId?
+
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
 
@@ -27,7 +29,7 @@ class ShowDialog extends Component
     @setState({ cardId })
 
   handleDone: =>
-    if @state.playerId? and @state.cardId?
+    if @stateIsOk()
       @props.app.recordShown(@state.playerId, @state.cardId)
       @setState({ playerId: null, cardId: null })
       @props.onClose()
@@ -39,26 +41,27 @@ class ShowDialog extends Component
     @props.onClose()
 
   render: ->
-    <Dialog open={@props.open} onClose={@handleCancel}>
+    { open, players, configuration } = @props
+    <Dialog open={open} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Shown Card</DialogTitle>
       <DialogContent>
-        <DialogContentText><h4>Who showed the card?</h4></DialogContentText>
+        <Typography variant="h4">Who showed the card?</Typography>
         <PlayerChooser 
           value={@state.playerId} 
-          playerIds={@props.playerIds} 
+          players={players} 
           onChange={@handleChangePlayer} />
         <Divider />
-        <DialogContentText><h4>What card did they show?</h4></DialogContentText>
+        <Typography variant="h4">What card did they show?</Typography>
         <CardChooser
           value={@state.cardId} 
-          cards={@props.configuration.cards} 
-          types={@props.configuration.types} 
+          cards={configuration.cards} 
+          types={configuration.types} 
           onChange={@handleChangeCard} 
         />
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
       </DialogActions>
     </Dialog>
 
