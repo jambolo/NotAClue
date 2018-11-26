@@ -4,6 +4,8 @@ import MenuItem from '@material-ui/core/MenuItem'
 import React, { Component } from 'react';
 `
 
+version = require './version'
+
 class MainMenu extends Component
   handleStart: =>
     @props.app.showNewGameDialog()
@@ -20,9 +22,10 @@ class MainMenu extends Component
   render: ->
     { anchor, enableShowLog, onClose} = @props
     <Menu id="main-menu" anchorEl={anchor} open={Boolean(anchor)} onClose={onClose}>
-      <MenuItem onClick={@handleStart}>Start New Game</MenuItem>
-      <MenuItem onClick={@handleClear}>Clear Current Game</MenuItem>
-      <MenuItem disabled={not enableShowLog} onClick={@handleLog}>Show Log</MenuItem>
+      <MenuItem onClick={@handleStart}> Start New Game</MenuItem>
+      <MenuItem onClick={@handleClear}> Clear Current Game</MenuItem>
+      <MenuItem disabled={not enableShowLog} onClick={@handleLog}> Show Log</MenuItem>
+      <MenuItem disabled={true}> {version} </MenuItem>
     </Menu>
 
 export default MainMenu
