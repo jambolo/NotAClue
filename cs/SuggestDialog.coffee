@@ -17,13 +17,28 @@ class SuggestDialog extends Component
   constructor: (props) ->
     super(props)
     @state =
-      suggesterId: null
-      cardIds: {}
-      showedIds: []
+      suggesterId:   null
+      cardIds:       {}
+      showedIds:     []
+      didNotShowIds: []
 
-  stateIsOk: ->
+  close: () ->
+    @setState({ suggesterId: null, cardIds: {}, showedIds: [], didNotShowIds: [] })
+    @props.onClose()
+
+  stateIsOkMaster: ->
     cardCount = (key for key of @state.cardIds).length
     return @state.suggesterId? and cardCount == 3 and @state.showedIds.length <= 3
+
+  stateIsOkClassic: ->
+    cardCount = (key for key of @state.cardIds).length
+    return @state.suggesterId? and cardCount == 3
+
+  stateIsOk: ->
+    if @props.configuration.rulesId is "master"
+      @stateIsOkMaster()
+    else
+      @stateIsOkClassic()
 
   handleChangeSuggesterId: (playerId) =>
     @setState({ suggesterId: playerId })
@@ -35,7 +50,7 @@ class SuggestDialog extends Component
       { cardIds: newCardIds }
     )
 
-  handleChangeShowedIds: (playerId, selected) =>
+  handleChangeShowedIdsMaster: (playerId, selected) =>
     if selected
       @setState((state, props) ->
         if playerId not in state.showedIds then { showedIds : state.showedIds.concat([playerId]) } else null
@@ -45,28 +60,61 @@ class SuggestDialog extends Component
         if playerId in state.showedIds then { showedIds : (id for id in state.showedIds when id isnt playerId) } else null
       )
 
-  handleDone: =>
-    if @stateIsOk()
+  handleChangeShowedIdsClassic: (playerId) =>
+    @setState({ showedIds: [playerId] })
+
+  handleChangeDidNotShowIdsClassic: (playerId, selected) =>
+    if selected
+      @setState((state, props) ->
+        if playerId not in state.didNotShowIds then { didNotShowIds : state.didNotShowIds.concat([playerId]) } else null
+      ) 
+    else
+      @setState((state, props) ->
+        if playerId in state.didNotShowIds then { didNotShowIds : (id for id in state.didNotShowIds when id isnt playerId) } else null
+      )
+
+  handleDoneMaster: =>
+    if @stateIsOkMaster()
       cardIds = (cardId for typeId, cardId of @state.cardIds)
       if @state.showedIds.length > 0
         @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
-        @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
-        @props.onClose()
+        @close()
       else
         @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed any cards?",
           () =>       
             @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
-            @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
-            @props.onClose()
+            @close()
           ,
           () -> {}
         )
     else
       @props.app.showConfirmDialog("Error", "You must select a suggester, 3 cards, and up to 3 players who showed cards.")
 
+  handleDoneClassic: =>
+    if @stateIsOkClassic()
+      cardIds = (cardId for typeId, cardId of @state.cardIds)
+      if @state.showedIds[0]?
+        @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.didNotShowIds.concat(@state.showedIds))
+        @close()
+      else
+        @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed a card?",
+          () =>       
+            @props.app.recordSuggestion(@state.suggesterId, cardIds, [])
+            @close()
+          ,
+          () -> {}
+        )
+    else
+      @props.app.showConfirmDialog("Error", "You must select a suggester, 3 cards, and up to 3 players who showed cards.")
+
+  handleDone: =>
+    if @props.configuration.rulesId is "master"
+      @handleDoneMaster()
+    else
+      @handleDoneClassic()
+
   handleCancel: =>
-    @setState({ suggesterId: null, cardIds: {}, showedIds: [] })
-    @props.onClose()
+    @close()
 
   render: ->
     { open, players, configuration } = @props
@@ -84,13 +132,35 @@ class SuggestDialog extends Component
           onChange={@handleChangeCards} 
         />
         <Divider />
-        <Typography variant="h4"> Who showed cards?</Typography>
-        <MultiplePlayerChooser 
-          value={@state.showedIds} 
-          players={players} 
-          excluded={if @state.suggesterId isnt null then [@state.suggesterId] else []} 
-          onChange={@handleChangeShowedIds} 
-        />
+        {
+          if configuration.rulesId is "master"
+            <div>
+              <Typography variant="h4"> Who showed a card? </Typography>
+              <MultiplePlayerChooser 
+                value={@state.showedIds} 
+                players={players} 
+                excluded={if @state.suggesterId isnt null then [@state.suggesterId] else []} 
+                onChange={@handleChangeShowedIdsMaster} 
+              />
+            </div>
+          else
+            <div>
+              <Typography variant="h4"> Who did not have a card? </Typography>
+              <MultiplePlayerChooser 
+                value={@state.didNotShowIds} 
+                players={players} 
+                excluded={if @state.suggesterId isnt null then @state.showedIds.concat([@state.suggesterId]) else []} 
+                onChange={@handleChangeDidNotShowIdsClassic} 
+              />
+              <Typography variant="h4"> Who showed a card? </Typography>
+              <PlayerChooser 
+                value={@state.showedIds[0]} 
+                players={players} 
+                excluded={if @state.suggesterId isnt null then @state.didNotShowIds.concat([@state.suggesterId]) else []} 
+                onChange={@handleChangeShowedIdsClassic} 
+              />
+            </div>
+        }
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
