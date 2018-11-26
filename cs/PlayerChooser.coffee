@@ -7,7 +7,7 @@ import React from 'react';
 `
 
 PlayerChoices = (props) ->
-  { value, players, onChange } = props
+  { value, players, excluded, onChange } = props
   <RadioGroup row name="players" value={value} onChange={onChange}>
     {
       for id in players
@@ -16,16 +16,18 @@ PlayerChoices = (props) ->
           value={id} 
           control={<Radio />} 
           label={id} 
+          disabled={excluded? and id in excluded}
         /> 
     }
   </RadioGroup>
 
 PlayerChooser = (props) ->
-  { value, players, onChange } = props
+  { value, players, excluded, onChange } = props
   <FormControl component="fieldset">
     <PlayerChoices
       value={value}
       players={players}
+      excluded={excluded}
       onChange={(event) -> onChange(event.target.value)}
     />
   </FormControl>

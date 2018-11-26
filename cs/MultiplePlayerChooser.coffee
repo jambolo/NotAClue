@@ -21,7 +21,7 @@ class MultiplePlayerChooser extends Component
             control={
               <Checkbox
                 checked={id in value}
-                disabled={id in excluded}
+                disabled={excluded? and id in excluded}
                 onChange={@makeChangeHandler(id)}
                 value={id}
               />
