@@ -129,26 +129,43 @@ configurations =
 class App extends Component
   constructor: (props) ->
     super(props)
+    @solver =       null
     @accusationId = 1
     @suggestionId = 1
     @state =
-      playerIds:          []
-      configurationId:    "master_detective"
-      solver:             null
-      log:                []
-      mainMenuAnchor:     null
-      handDialogOpen:     false
-      suggestDialogOpen:  false
-      showDialogOpen:     false
-      accuseDialogOpen:   false
-      newGameDialogOpen:  false
+      playerIds:         []
+      configurationId:   "master_detective"
+      log:               []
+      mainMenuAnchor:    null
+      newGameDialogOpen: false
+      logDialogOpen:     false
       confirmDialog:
         open:      false
         title:     ''
         question:  ''
         yesAction: null
         noAction:  null
-      logDialogOpen:       false
+      handDialogOpen:    false
+      suggestDialogOpen: false
+      showDialogOpen:    false
+      accuseDialogOpen:  false
+    return
+
+  newGame: (configurationId, playerIds) ->
+    @solver =       new Solver(configurations[configurationId], playerIds)
+    @accusationId = 1
+    @suggestionId = 1
+    @setState({
+      playerIds:       playerIds
+      configurationId: configurationId
+      log:             [@setupLogEntry(configurationId, playerIds)]
+    })
+    return
+
+  clearGame: ->
+    @solver = null
+    @setState({ log: [] })
+    return
 
   setupLogEntry: (configurationId, playerIds) ->
     { 
@@ -157,121 +174,14 @@ class App extends Component
         players:   playerIds
     }
 
-  logHandEntry: (playerId, cardIds) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          hand:
-            player: playerId
-            cards:  cardIds
-        }])
-      }
-    )
-    return
+  # Component launchers
 
-  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          suggest:
-            id:        id
-            suggester: suggesterId
-            cards:     cardIds
-            showed:    showedIds
-        }])
-      }
-    )
-    return
-
-  logShowEntry: (playerId, cardId) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          show:
-              player: playerId
-              card:   cardId
-        }])
-      }
-    )
-    return
-
-  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          accuse:
-            id:      id
-            accuser: accuserId
-            cards:   cardIds
-            outcome: outcome
-        }])
-      }
-    )
-    return
-
-  newGame: (configurationId, playerIds) =>
-    @accusationId = 1
-    @suggestionId = 1
-    @setState({
-      playerIds:       playerIds
-      configurationId: configurationId
-      solver:          new Solver(configurations[configurationId], playerIds)
-      log:             [@setupLogEntry(configurationId, playerIds)]
-    })
-    return
-
-  clearGame: =>
-    @setState({ solver: null, progress: 0 , log: []})
-    return
-
-  recordHand: (playerId, cardIds) =>
-    if @state.solver?
-      @state.solver.hand(playerId, cardIds) 
-      @logHandEntry(playerId, cardIds)
-    return
-
-  recordSuggestion: (suggesterId, cardIds, showedIds) =>
-    if @state.solver?
-      id = @suggestionId++
-      @state.solver.suggest(suggesterId, cardIds, showedIds, id)
-      @logSuggestEntry(suggesterId, cardIds, showedIds)
-    return
-
-  recordShown: (playerId, cardId) =>
-    if @state.solver?
-      @state.solver.show(playerId, cardId)
-      @logShowEntry(playerId, cardId)
-    return
-
-  recordAccusation: (accuserId, cardIds, outcome) =>
-    if @state.solver?
-      id = @accusationId++
-      @state.solver.accuse(accuserId, cardIds, outcome, id)
-      @logAccuseEntry(accuserId, cardIds, outcome)
-    return
-
-  showMainMenu: (anchor) ->
+  showMainMenu: (anchor) =>
     @setState({ mainMenuAnchor: anchor })
     return
 
   showNewGameDialog: =>
     @setState({ newGameDialogOpen: true })
-    return
-
-  showHandDialog: =>
-    @setState({ handDialogOpen: true })
-    return
-
-  showSuggestDialog: =>
-    @setState({ suggestDialogOpen: true })    
-    return
-
-  showShowDialog: =>
-    @setState({ showDialogOpen: true })
-    return
-
-  showAccuseDialog: =>
-    @setState({ accuseDialogOpen: true })
     return
 
   showLog: =>
@@ -290,12 +200,108 @@ class App extends Component
     })
     return
 
+  showHandDialog: =>
+    @setState({ handDialogOpen: true })
+    return
+
+  showSuggestDialog: =>
+    @setState({ suggestDialogOpen: true })    
+    return
+
+  showShowDialog: =>
+    @setState({ showDialogOpen: true })
+    return
+
+  showAccuseDialog: =>
+    @setState({ accuseDialogOpen: true })
+    return
+
+  # Solver state updaters
+
+  recordHand: (playerId, cardIds) ->
+    if @solver?
+      @solver.hand(playerId, cardIds) 
+      @logHandEntry(playerId, cardIds)
+    return
+
+  logHandEntry: (playerId, cardIds) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          hand:
+            player: playerId
+            cards:  cardIds
+        }])
+      }
+    )
+    return
+
+  recordSuggestion: (suggesterId, cardIds, showedIds) ->
+    if @solver?
+      id = @suggestionId++
+      @solver.suggest(suggesterId, cardIds, showedIds, id)
+      @logSuggestEntry(suggesterId, cardIds, showedIds, id)
+    return
+
+  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          suggest:
+            id:        id
+            suggester: suggesterId
+            cards:     cardIds
+            showed:    showedIds
+        }])
+      }
+    )
+    return
+
+  recordShown: (playerId, cardId) ->
+    if @solver?
+      @solver.show(playerId, cardId)
+      @logShowEntry(playerId, cardId)
+    return
+
+  logShowEntry: (playerId, cardId) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          show:
+              player: playerId
+              card:   cardId
+        }])
+      }
+    )
+    return
+
+  recordAccusation: (accuserId, cardIds, outcome) ->
+    if @solver?
+      id = @accusationId++
+      @solver.accuse(accuserId, cardIds, outcome, id)
+      @logAccuseEntry(accuserId, cardIds, outcome, id)
+    return
+
+  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          accuse:
+            id:      id
+            accuser: accuserId
+            cards:   cardIds
+            outcome: outcome
+        }])
+      }
+    )
+    return
+
   render: ->
     <div className="App">
-      <MainView configurationId={@state.configurationId} solver={@state.solver} app={this} />
+      <MainView configurationId={@state.configurationId} solver={@solver} app={this} />
       <MainMenu
         anchor={@state.mainMenuAnchor}
-        enableShowLog={@state.log? and @state.log.length > 0}
+        started={@solver?}
         onClose={() => @setState({ mainMenuAnchor: null })}
         app={this}
       />
@@ -303,6 +309,22 @@ class App extends Component
         open={@state.newGameDialogOpen}
         configurations={configurations}
         onClose={() => @setState({ newGameDialogOpen: false })}
+        app={this}
+      />
+      <LogDialog
+        open={@state.logDialogOpen}
+        log={@state.log}
+        configurations={configurations}
+        onClose={() => @setState({ logDialogOpen: false })}
+        app={this}
+      />
+      <ConfirmDialog
+        open={@state.confirmDialog.open}
+        title={@state.confirmDialog.title}
+        question={@state.confirmDialog.question}
+        yesAction={@state.confirmDialog.yesAction}
+        noAction={@state.confirmDialog.noAction}
+        onClose={@handleConfirmDialogClose}
         app={this}
       />
       <HandDialog
@@ -331,22 +353,6 @@ class App extends Component
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
         onClose={() => @setState({ accuseDialogOpen: false })}
-        app={this}
-      />
-      <LogDialog
-        open={@state.logDialogOpen}
-        log={@state.log}
-        configurations={configurations}
-        onClose={() => @setState({ logDialogOpen: false })}
-        app={this}
-      />
-      <ConfirmDialog
-        open={@state.confirmDialog.open}
-        title={@state.confirmDialog.title}
-        question={@state.confirmDialog.question}
-        yesAction={@state.confirmDialog.yesAction}
-        noAction={@state.confirmDialog.noAction}
-        onClose={@handleConfirmDialogClose}
         app={this}
       />
     </div>

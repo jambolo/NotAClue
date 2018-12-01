@@ -23,11 +23,11 @@ class MainMenu extends Component
     return
 
   render: ->
-    { anchor, enableShowLog, onClose} = @props
+    { anchor, started, onClose} = @props
     <Menu id="main-menu" anchorEl={anchor} open={Boolean(anchor)} onClose={onClose}>
-      <MenuItem onClick={@handleStart}> Start New Game</MenuItem>
-      <MenuItem onClick={@handleClear}> Clear Current Game</MenuItem>
-      <MenuItem disabled={not enableShowLog} onClick={@handleLog}> Show Log</MenuItem>
+      <MenuItem onClick={@handleStart}> Start New Game </MenuItem>
+      <MenuItem onClick={@handleClear}> Clear Current Game </MenuItem>
+      <MenuItem disabled={not started} onClick={@handleLog}> Show Log </MenuItem>
       <MenuItem disabled={true}> {version} </MenuItem>
     </Menu>
 
