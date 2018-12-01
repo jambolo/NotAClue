@@ -86,7 +86,7 @@ class LogDialog extends Component
     { open, log, configurations, onClose } = @props
     @configuration = if log[0]? and log[0].setup? then configurations[log[0].setup.variation] else null
 
-    <Dialog open={open} fullscreen="true" onClose={onClose}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={onClose}>
       <DialogTitle id="form-dialog-title">Log</DialogTitle>
       <DialogContent>
         <ol>
@@ -94,7 +94,7 @@ class LogDialog extends Component
         </ol>
      </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="primary" onClick={onClose}>Done</Button>
+        <Button variant="contained" color="primary" onClick={onClose}> Done </Button>
       </DialogActions>
     </Dialog>
 

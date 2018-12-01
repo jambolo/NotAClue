@@ -118,7 +118,7 @@ class SuggestDialog extends Component
 
   render: ->
     { open, players, configuration } = @props
-    <Dialog open={open} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Suggestion</DialogTitle>
       <DialogContent>
         <Typography variant="h4"> Who made the suggestion? </Typography>

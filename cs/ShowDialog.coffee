@@ -42,7 +42,7 @@ class ShowDialog extends Component
 
   render: ->
     { open, players, configuration } = @props
-    <Dialog open={open} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record A Shown Card</DialogTitle>
       <DialogContent>
         <Typography variant="h4">Who showed the card?</Typography>

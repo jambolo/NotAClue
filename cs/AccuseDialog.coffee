@@ -56,7 +56,7 @@ class AccuseDialog extends Component
 
   render: ->
     { open, configuration, players } = @props
-    <Dialog open={open} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record An Accusation</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Who made the accusation?</Typography>

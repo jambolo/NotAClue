@@ -19,7 +19,7 @@ class ConfirmDialog extends Component
 
   render: ->
     { open, title, question, yesAction, noAction } = @props
-    <Dialog disableBackdropClick disableEscapeKeyDown open={open} onClose={@handleNo}>
+    <Dialog disableBackdropClick={true} disableEscapeKeyDown={true} open={open} onClose={@handleNo}>
       <DialogTitle id="form-dialog-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>

@@ -126,7 +126,7 @@ class SetupDialog extends Component
     minPlayers = if @state.configurationId then configurations[@state.configurationId].minPlayers else 0
     maxPlayers = if @state.configurationId then configurations[@state.configurationId].maxPlayers else 0
 
-    <Dialog open={open} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">New Game</DialogTitle>
       <DialogContent>
         <ConfigurationChooser

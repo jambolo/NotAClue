@@ -49,7 +49,7 @@ class HandDialog extends Component
 
   render: ->
     { open, players, configuration } = @props
-    <Dialog open={open} fullscreen="true" onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
       <DialogTitle id="form-dialog-title">Record Your Hand</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Which player are you?</Typography>
