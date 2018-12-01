@@ -20,8 +20,17 @@ class ShowDialog extends Component
       cardId: null
     return
 
+  close: ->
+    @setState({ playerId: null, cardId: null })
+    @props.onClose()
+    return
+
   stateIsOk: ->
     @state.playerId? and @state.cardId?
+
+  handleClose: =>
+    @close()
+    return
 
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
@@ -31,23 +40,21 @@ class ShowDialog extends Component
     @setState({ cardId })
     return
 
-  handleDone: =>
-    if @stateIsOk()
-      @props.app.recordShown(@state.playerId, @state.cardId)
-      @setState({ playerId: null, cardId: null })
-      @props.onClose()
-    else
-      @props.app.showConfirmDialog("Error", "You must select a player and a card")
-    return
-
   handleCancel: =>
-    @setState({ playerId: null, cardId: null })
-    @props.onClose()
+    @close()
+    return
+    
+  handleDone: =>
+    if not @stateIsOk()
+      @props.app.showConfirmDialog("Error", "You must select a player and a card")
+      return
+    @props.app.recordShown(@state.playerId, @state.cardId)
+    @close()
     return
 
   render: ->
     { open, players, configuration } = @props
-    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleClose}>
       <DialogTitle id="form-dialog-title">Record A Shown Card</DialogTitle>
       <DialogContent>
         <Typography variant="h4">Who showed the card?</Typography>

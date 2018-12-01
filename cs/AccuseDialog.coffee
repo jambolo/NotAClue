@@ -25,9 +25,18 @@ class AccuseDialog extends Component
       outcome:   null
     return
 
+  close: ->
+    @setState({ accuserId: null, cardIds: {}, outcome: null })
+    @props.onClose()
+    return
+
   stateIsOk: ->
     cardCount = (key for key of @state.cardIds).length
     @state.accuserId? and cardCount == 3 and @state.outcome?
+
+  handleClose: =>
+    @close()
+    return
 
   handleChangeAccuserId: (playerId) =>
     @setState({ accuserId: playerId })
@@ -45,24 +54,22 @@ class AccuseDialog extends Component
     @setState({ outcome: event.target.value })
     return
 
+  handleCancel: =>
+    @close()
+    return
+
   handleDone: =>
     if @stateIsOk()
       cardIds = (cardId for typeId, cardId of @state.cardIds)
       @props.app.recordAccusation(@state.accuserId, cardIds, @state.outcome == "yes")
-      @setState({ accuserId: null, cardIds: {}, outcome: null })
-      @props.onClose()
+      @close()
     else
       @props.app.showConfirmDialog("Error", "You must select an accuser, 3 cards, and the outcome.")
     return
 
-  handleCancel: =>
-    @setState({ accuserId: null, cardIds: {}, outcome: null })
-    @props.onClose()
-    return
-
   render: ->
     { open, configuration, players } = @props
-    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleClose}>
       <DialogTitle id="form-dialog-title">Record An Accusation</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Who made the accusation?</Typography>
