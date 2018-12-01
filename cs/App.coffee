@@ -1,15 +1,12 @@
 `
 import Solver from './Solver'
-import TopBar from './TopBar'
 
 import AccuseDialog from './AccuseDialog'
-import Button from '@material-ui/core/Button';
 import ConfirmDialog from './ConfirmDialog'
-import CurrentState from './CurrentState'
-import Divider from '@material-ui/core/Divider'
 import HandDialog from './HandDialog'
 import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
+import MainView from './MainView'
 import React, { Component } from 'react';
 import SetupDialog from './SetupDialog'
 import ShowDialog from './ShowDialog'
@@ -48,8 +45,6 @@ classic =
     ballroom:     { name: "Ballroom",        type: "room"    }
     hall:         { name: "Hall",            type: "room"    }
   suggestionOrder: [ "suspect", "weapon", "room" ]
-
-
 
 master_detective =
   name:       "Master Detective"
@@ -281,18 +276,7 @@ class App extends Component
 
   render: ->
     <div className="App">
-      <TopBar app={this} />
-      {
-        if @state.solver?
-          <div>
-            <Button variant="contained" color="primary" onClick={@showHandDialog}>Hand</Button>
-            <Button variant="contained" color="primary" onClick={@showSuggestDialog}>Suggest</Button>
-            <Button variant="contained" color="primary" onClick={@showShowDialog}>Show</Button>
-            <Button variant="contained" color="primary" onClick={@showAccuseDialog}>Accuse</Button>
-            <Divider />
-            <CurrentState solver={@state.solver} app={this} /> 
-          </div>
-      }
+      <MainView configurationId={@state.configurationId} solver={@state.solver} app={this} />
       <MainMenu
         anchor={@state.mainMenuAnchor}
         enableShowLog={@state.log? and @state.log.length > 0}
