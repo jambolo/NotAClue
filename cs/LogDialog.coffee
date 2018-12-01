@@ -49,6 +49,7 @@ class LogDialog extends Component
   constructor: (props) ->
     super(props)
     @configuration = null
+    return
 
   describeSetup: (info) =>
     "Playing #{@configuration.name} with #{playerList(info.players)}."

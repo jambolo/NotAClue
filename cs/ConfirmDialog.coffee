@@ -10,12 +10,14 @@ import React, { Component } from 'react';
 
 class ConfirmDialog extends Component
   handleYes: =>
-    @props.onClose()
     @props.yesAction() if @props.yesAction?
+    @props.onClose()
+    return
 
   handleNo: =>
-    @props.onClose()
     @props.noAction() if @props.noAction?
+    @props.onClose()
+    return
 
   render: ->
     { open, title, question, yesAction, noAction } = @props

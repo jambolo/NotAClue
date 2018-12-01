@@ -55,9 +55,11 @@ class MultipleCardChooser extends Component
     super(props)
     @state =
       currentTab: 0
+    return
 
   handleChangeTab: (event, currentTab) =>
     @setState({ currentTab });
+    return
 
   render: ->
     { value, cards, types, excluded, onChange } = @props

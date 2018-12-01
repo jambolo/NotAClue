@@ -18,15 +18,18 @@ class ShowDialog extends Component
     @state =
       playerId: null
       cardId: null
+    return
 
   stateIsOk: ->
     @state.playerId? and @state.cardId?
 
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
+    return
 
   handleChangeCard: (cardId) =>
     @setState({ cardId })
+    return
 
   handleDone: =>
     if @stateIsOk()
@@ -35,10 +38,12 @@ class ShowDialog extends Component
       @props.onClose()
     else
       @props.app.showConfirmDialog("Error", "You must select a player and a card")
+    return
 
   handleCancel: =>
     @setState({ playerId: null, cardId: null })
     @props.onClose()
+    return
 
   render: ->
     { open, players, configuration } = @props

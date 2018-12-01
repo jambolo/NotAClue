@@ -42,9 +42,11 @@ class AddPlayerInput extends Component
     super(props)
     @state = 
       playerId: ''
+    return
 
   handleChange: (event) =>
     @setState({ playerId: event.target.value })
+    return
 
   handleKeyDown: (event) =>
     if event.keyCode == 13 and @props.count < @props.max
@@ -58,6 +60,7 @@ class AddPlayerInput extends Component
       else
         @props.app.showConfirmDialog("Error", "A player's name must be unique and it cannot be ANSWER.")
       @setState({ playerId: '' })
+    return
 
   render: ->
     <div>
@@ -103,22 +106,28 @@ class SetupDialog extends Component
     @state =
       playerIds: []
       configurationId: null
+    return
 
   handleAddPlayer: (playerId) =>
     @setState( (state, props) -> { playerIds: state.playerIds.concat([playerId]) } )
+    return
 
   handleClearPlayers: =>
     @setState({ playerIds: [] })
+    return
 
   handleChangeConfiguration: (configurationId) =>
     @setState({ configurationId })
+    return
 
   handleDone: =>
     @props.app.newGame(@state.configurationId, @state.playerIds)
     @props.onClose()
+    return
 
   handleCancel: =>
     @props.onClose()
+    return
 
   render: ->
     { open, configurations, app } = @props

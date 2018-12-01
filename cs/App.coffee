@@ -165,6 +165,7 @@ class App extends Component
         }])
       }
     )
+    return
 
   logSuggestEntry: (suggesterId, cardIds, showedIds) ->
     @setState((state, props) -> 
@@ -177,6 +178,7 @@ class App extends Component
         }])
       }
     )
+    return
 
   logShowEntry: (playerId, cardId) ->
     @setState((state, props) -> 
@@ -188,6 +190,7 @@ class App extends Component
         }])
       }
     )
+    return
 
   logAccuseEntry: (accuserId, cardIds, outcome) ->
     @setState((state, props) -> 
@@ -200,6 +203,7 @@ class App extends Component
         }])
       }
     )
+    return
 
   newGame: (configurationId, playerIds) =>
     @setState({
@@ -208,50 +212,63 @@ class App extends Component
       solver:          new Solver(configurations[configurationId], playerIds)
       log:             [@setupLogEntry(configurationId, playerIds)]
     })
+    return
 
   clearGame: =>
     @setState({ solver: null, progress: 0 , log: []})
+    return
 
   recordHand: (playerId, cardIds) =>
     if @state.solver?
       @state.solver.hand(playerId, cardIds) 
       @logHandEntry(playerId, cardIds)
+    return
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @state.solver?
       @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
       @logSuggestEntry(suggesterId, cardIds, showedIds)
+    return
 
   recordShown: (playerId, cardId) =>
     if @state.solver?
       @state.solver.show(playerId, cardId)
       @logShowEntry(playerId, cardId)
+    return
 
   recordAccusation: (accuserId, cardIds, outcome) =>
     if @state.solver?
       @state.solver.accuse(accuserId, cardIds, outcome)
       @logAccuseEntry(accuserId, cardIds, outcome)
+    return
 
   showMainMenu: (anchor) ->
     @setState({ mainMenuAnchor: anchor })
+    return
 
   showNewGameDialog: =>
     @setState({ newGameDialogOpen: true })
+    return
 
   showHandDialog: =>
     @setState({ handDialogOpen: true })
+    return
 
   showSuggestDialog: =>
     @setState({ suggestDialogOpen: true })    
+    return
 
   showShowDialog: =>
     @setState({ showDialogOpen: true })
+    return
 
   showAccuseDialog: =>
     @setState({ accuseDialogOpen: true })
+    return
 
   showLog: =>
     @setState({ logDialogOpen: true })
+    return
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
     @setState({ 
@@ -263,6 +280,7 @@ class App extends Component
         noAction
       }
     })
+    return
 
   handleConfirmDialogClose: =>
     @setState({ 
@@ -273,6 +291,7 @@ class App extends Component
         yesAction: null
         noAction:  null 
     })
+    return
 
   render: ->
     <div className="App">

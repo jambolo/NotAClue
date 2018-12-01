@@ -3,6 +3,7 @@ class Card
 
   remove: (playerId) ->
     @holders = @holders.filter (h) -> h isnt playerId
+    return
 
   mightBeHeldBy: (playerId) ->
     playerId in @holders
@@ -11,11 +12,11 @@ class Card
     @holders.length is 1 and @holders[0] is playerId
 
 class Player
-  constructor: (cardIds) ->
-    @potential = cardIds
+  constructor: (@potential) ->
 
   remove: (cardId) ->
     @potential = @potential.filter (c) -> c isnt cardId
+    return
 
   doesNotHold: (cardId) ->
     cardId not in @potential
@@ -176,10 +177,7 @@ class Solver
     return changed
 
   deduceFromSuggestionWithClassicRules: (suggestion, changed) ->
-    id = suggestion.id
-    suggesterId = suggestion.playerId
-    cardIds = suggestion.cardIds
-    showedIds = suggestion.showedIds
+    { id, suggesterId, cardIds, showedIds } = suggestion
 
     # You can deduce from a suggestion that:
     #    If nobody showed a card, then none of the players (except possibly the suggester or the answer) have the cards.
@@ -208,10 +206,7 @@ class Solver
     return changed
 
   deduceFromSuggestionWithMasterRules: (suggestion, changed) ->
-    id = suggestion.id
-    suggesterId = suggestion.playerId
-    cardIds = suggestion.cardIds
-    showedIds = suggestion.showedIds
+    { id, suggesterId, cardIds, showedIds } = suggestion
 
     # You can deduce from a suggestion that:
     #    If a player shows a card but does not have all but one of the suggested cards, the player must hold the one.

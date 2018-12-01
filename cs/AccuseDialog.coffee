@@ -23,13 +23,15 @@ class AccuseDialog extends Component
       accuserId: null
       cardIds:   {}
       outcome:   null
+    return
 
   stateIsOk: ->
     cardCount = (key for key of @state.cardIds).length
-    return @state.accuserId? and cardCount == 3 and @state.outcome?
+    @state.accuserId? and cardCount == 3 and @state.outcome?
 
   handleChangeAccuserId: (playerId) =>
     @setState({ accuserId: playerId })
+    return
 
   handleChangeCards: (typeId, cardId) =>
     @setState((state, props) ->
@@ -37,9 +39,11 @@ class AccuseDialog extends Component
       newCardIds[typeId] = cardId
       { cardIds: newCardIds }
     )
+    return
 
   handleChangeOutcome: (event) =>
     @setState({ outcome: event.target.value })
+    return
 
   handleDone: =>
     if @stateIsOk()
@@ -49,10 +53,12 @@ class AccuseDialog extends Component
       @props.onClose()
     else
       @props.app.showConfirmDialog("Error", "You must select an accuser, 3 cards, and the outcome.")
+    return
 
   handleCancel: =>
     @setState({ accuserId: null, cardIds: {}, outcome: null })
     @props.onClose()
+    return
 
   render: ->
     { open, configuration, players } = @props

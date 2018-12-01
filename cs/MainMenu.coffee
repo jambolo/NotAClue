@@ -10,14 +10,17 @@ class MainMenu extends Component
   handleStart: =>
     @props.app.showNewGameDialog()
     @props.onClose()
+    return
 
   handleClear: =>
     @props.app.showConfirmDialog("Please confirm", "Are you sure you want to clear the current game?", @props.app.clearGame, () -> {})
     @props.onClose()
+    return
 
   handleLog: =>
     @props.app.showLog()
     @props.onClose()
+    return
 
   render: ->
     { anchor, enableShowLog, onClose} = @props

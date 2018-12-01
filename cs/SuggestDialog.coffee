@@ -21,10 +21,12 @@ class SuggestDialog extends Component
       cardIds:       {}
       showedIds:     []
       didNotShowIds: []
+    return
 
   close: () ->
     @setState({ suggesterId: null, cardIds: {}, showedIds: [], didNotShowIds: [] })
     @props.onClose()
+    return
 
   stateIsOkMaster: ->
     cardCount = (key for key of @state.cardIds).length
@@ -42,6 +44,7 @@ class SuggestDialog extends Component
 
   handleChangeSuggesterId: (playerId) =>
     @setState({ suggesterId: playerId })
+    return
 
   handleChangeCards: (typeId, cardId) =>
     @setState((state, props) ->
@@ -49,6 +52,7 @@ class SuggestDialog extends Component
       newCardIds[typeId] = cardId
       { cardIds: newCardIds }
     )
+    return
 
   handleChangeShowedIdsMaster: (playerId, selected) =>
     if selected
@@ -59,9 +63,11 @@ class SuggestDialog extends Component
       @setState((state, props) ->
         if playerId in state.showedIds then { showedIds : (id for id in state.showedIds when id isnt playerId) } else null
       )
+    return
 
   handleChangeShowedIdsClassic: (playerId) =>
     @setState({ showedIds: [playerId] })
+    return
 
   handleChangeDidNotShowIdsClassic: (playerId, selected) =>
     if selected
@@ -72,6 +78,7 @@ class SuggestDialog extends Component
       @setState((state, props) ->
         if playerId in state.didNotShowIds then { didNotShowIds : (id for id in state.didNotShowIds when id isnt playerId) } else null
       )
+    return
 
   handleDoneMaster: =>
     if @stateIsOkMaster()
@@ -89,6 +96,7 @@ class SuggestDialog extends Component
         )
     else
       @props.app.showConfirmDialog("Error", "You must select a suggester, 3 cards, and up to 3 players who showed cards.")
+    return
 
   handleDoneClassic: =>
     if @stateIsOkClassic()
@@ -106,15 +114,18 @@ class SuggestDialog extends Component
         )
     else
       @props.app.showConfirmDialog("Error", "You must select a suggester, 3 cards, and up to 3 players who showed cards.")
+    return
 
   handleDone: =>
     if @props.configuration.rulesId is "master"
       @handleDoneMaster()
     else
       @handleDoneClassic()
+    return
 
   handleCancel: =>
     @close()
+    return
 
   render: ->
     { open, players, configuration } = @props
@@ -163,8 +174,10 @@ class SuggestDialog extends Component
         }
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" color="primary" onClick={@handleCancel}>Cancel</Button>
-        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>Done</Button>
+        <Button variant="contained" color="primary" onClick={@handleCancel}> Cancel </Button>
+        <Button disabled={not @stateIsOk()} variant="contained" color="primary" onClick={@handleDone}>
+          Done
+        </Button>
       </DialogActions>
     </Dialog>
 
