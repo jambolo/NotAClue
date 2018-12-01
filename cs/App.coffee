@@ -129,6 +129,8 @@ configurations =
 class App extends Component
   constructor: (props) ->
     super(props)
+    @accusationId = 1
+    @suggestionId = 1
     @state =
       playerIds:          []
       configurationId:    "master_detective"
@@ -167,11 +169,12 @@ class App extends Component
     )
     return
 
-  logSuggestEntry: (suggesterId, cardIds, showedIds) ->
+  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
     @setState((state, props) -> 
       { 
         log: state.log.concat([{
           suggest:
+            id:        id
             suggester: suggesterId
             cards:     cardIds
             showed:    showedIds
@@ -192,11 +195,12 @@ class App extends Component
     )
     return
 
-  logAccuseEntry: (accuserId, cardIds, outcome) ->
+  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
     @setState((state, props) -> 
       { 
         log: state.log.concat([{
           accuse:
+            id:      id
             accuser: accuserId
             cards:   cardIds
             outcome: outcome
@@ -206,6 +210,8 @@ class App extends Component
     return
 
   newGame: (configurationId, playerIds) =>
+    @accusationId = 1
+    @suggestionId = 1
     @setState({
       playerIds:       playerIds
       configurationId: configurationId
@@ -226,7 +232,8 @@ class App extends Component
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @state.solver?
-      @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
+      id = @suggestionId++
+      @state.solver.suggest(suggesterId, cardIds, showedIds, id)
       @logSuggestEntry(suggesterId, cardIds, showedIds)
     return
 
@@ -238,7 +245,8 @@ class App extends Component
 
   recordAccusation: (accuserId, cardIds, outcome) =>
     if @state.solver?
-      @state.solver.accuse(accuserId, cardIds, outcome)
+      id = @accusationId++
+      @state.solver.accuse(accuserId, cardIds, outcome, id)
       @logAccuseEntry(accuserId, cardIds, outcome)
     return
 
@@ -279,17 +287,6 @@ class App extends Component
         yesAction
         noAction
       }
-    })
-    return
-
-  handleConfirmDialogClose: =>
-    @setState({ 
-      confirmDialog: 
-        open:      false
-        title:     ''
-        question:  ''
-        yesAction: null
-        noAction:  null 
     })
     return
 
@@ -353,5 +350,19 @@ class App extends Component
         app={this}
       />
     </div>
+
+  # Callbacks
+  
+  handleConfirmDialogClose: =>
+    @setState({ 
+      confirmDialog: 
+        open:      false
+        title:     ""
+        question:  ""
+        yesAction: null
+        noAction:  null 
+    })
+    return
+
 
 export default App

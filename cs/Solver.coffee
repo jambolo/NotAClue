@@ -44,10 +44,10 @@ class Solver
     @players[p] = new Player(cardIds) for p in playerIdsIncludingAnswer
     @ANSWER = @players[@ANSWER_PLAYER_ID]
 
-  accuse: (playerId, cardIds, outcome) ->
+  accuse: (accuserId, cardIds, outcome, id) ->
     @discoveriesLog = []
 
-    accusation = { playerId, cardIds, outcome }
+    accusation = { id, accuserId, cardIds, outcome }
     @accusations.push(accusation)
 
     changed = false
@@ -71,10 +71,10 @@ class Solver
     changed = @makeOtherDeductions(changed)
     return changed
 
-  suggest: (playerId, cardIds, showedIds, id) ->
+  suggest: (suggesterId, cardIds, showedIds, id) ->
     @discoveriesLog = []
 
-    suggestion = { id, playerId, cardIds, showedIds }
+    suggestion = { id, suggesterId, cardIds, showedIds }
     @suggestions.push(suggestion)
 
     changed = false
@@ -131,7 +131,7 @@ class Solver
     return typeId in @types
 
   deduceFromAccusation: (accusation, changed) ->
-    { playerId, cardIds, outcome } = accusation
+    { id, accuserId, cardIds, outcome } = accusation
 
     # You can deduce from an accusation that:
     #    The accuser does not have the cards in the accusation.
@@ -139,8 +139,8 @@ class Solver
     #    If the accusation is incorrect, then
     #      If two of the cards are held by the answer, then it must not hold the third
 
-    @addDiscoveries(playerId, cardIds, false, "made an accusation with these cards")
-    changed = @disassociatePlayerWithCards(playerId, cardIds, changed)
+    @addDiscoveries(accuserId, cardIds, false, "stated these cards in accusation #" + id)
+    changed = @disassociatePlayerWithCards(accuserId, cardIds, changed)
 
     if outcome
       for cardId in cardIds
@@ -148,15 +148,9 @@ class Solver
     else
       mustNotHoldId = @playerMustNotHoldOne(@ANSWER_PLAYER_ID, cardIds)
       if mustNotHoldId isnt null
-        @addDiscovery(@ANSWER_PLAYER_ID, mustNotHoldId, false, "the accusation was wrong but the answer holds the others")
+        @addDiscovery(@ANSWER_PLAYER_ID, mustNotHoldId, false, "accusation #" + id + " was wrong but the answer does hold the others")
         changed = @disassociatePlayerWithCard(@ANSWER_PLAYER_ID, mustNotHoldId, changed)
     return changed
-
-  deduceFromSuggestion: (suggestion, changed) ->
-    if @rulesId == "master"
-      return @deduceFromSuggestionWithMasterRules(suggestion, changed)
-    else
-      return @deduceFromSuggestionWithClassicRules(suggestion, changed)
 
   # Make deductions based on the player having exactly these cards
   deduceFromHand: (playerId, hand, changed) ->
@@ -174,6 +168,13 @@ class Solver
   deduceFromShow: (playerId, cardId, changed) ->
     @addDiscovery(playerId, cardId, true, "revealed")
     changed = @associatePlayerWithCard(playerId, cardId, changed)
+    return changed
+
+  deduceFromSuggestion: (suggestion, changed) ->
+    if @rulesId == "master"
+      changed = @deduceFromSuggestionWithMasterRules(suggestion, changed)
+    else
+      changed = @deduceFromSuggestionWithClassicRules(suggestion, changed)
     return changed
 
   deduceFromSuggestionWithClassicRules: (suggestion, changed) ->
@@ -244,8 +245,8 @@ class Solver
     # While something has changed, then keep re-applying all the suggestions and accusations
     while (changed)
       changed = false
-      changed = @deduceFromSuggestion(s, changed) for s in @suggestions
-      changed = @deduceFromAccusation(a, changed) for a in @accusations
+      changed = @deduceFromSuggestion(suggestion, changed) for suggestion in @suggestions
+      changed = @deduceFromAccusation(accusation, changed) for accusation in @accusations
       @addCardHoldersToDiscoveries()
       changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 
