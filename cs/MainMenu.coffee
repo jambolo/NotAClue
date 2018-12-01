@@ -22,10 +22,16 @@ class MainMenu extends Component
     @props.onClose()
     return
 
+  handleImport: =>
+    @props.app.showImportDialog()
+    @props.onClose()
+    return
+
   render: ->
     { anchor, started, onClose} = @props
     <Menu id="main-menu" anchorEl={anchor} open={Boolean(anchor)} onClose={onClose}>
       <MenuItem onClick={@handleStart}> Start New Game </MenuItem>
+      <MenuItem onClick={@handleImport}> Import Log </MenuItem>
       <MenuItem disabled={not started} onClick={@handleLog}> Show Log </MenuItem>
       <MenuItem disabled={not started} onClick={@handleExport}> Export Log </MenuItem>
       <MenuItem disabled={true}> {version} </MenuItem>

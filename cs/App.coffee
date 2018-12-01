@@ -5,6 +5,7 @@ import AccuseDialog from './AccuseDialog'
 import ConfirmDialog from './ConfirmDialog'
 import ExportDialog from './ExportDialog'
 import HandDialog from './HandDialog'
+import ImportDialog from './ImportDialog'
 import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
 import MainView from './MainView'
@@ -163,6 +164,32 @@ class App extends Component
     })
     return
 
+  importLog: (imported) ->
+    importedLog = JSON.parse(imported)
+    if importedLog.length == 0
+      @solver = null
+      return
+
+    setup = importedLog[0].setup
+    @newGame(setup.variation, setup.players)
+
+    for entry in importedLog[1..]
+      if entry.hand?
+        { player, cards } = entry.hand
+        @recordHand(player, cards)
+      else if entry.suggest? 
+        { suggester, cards, showed } = entry.suggest
+        @recordSuggestion(suggester, cards, showed)
+      else if entry.show?
+        { player, card } = entry.show
+        @recordShow(player, card)
+      else if entry.accuse?
+        { accuser, cards, outcome } = entry.accuse
+        @recordAccusation(accuser, cards, outcome)
+      else
+        console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
+    return
+
   setupLogEntry: (configurationId, playerIds) ->
     { 
       setup:
@@ -178,6 +205,10 @@ class App extends Component
 
   showNewGameDialog: =>
     @setState({ newGameDialogOpen: true })
+    return
+
+  showImportDialog: =>
+    @setState({ importDialogOpen: true })
     return
 
   showLog: =>
