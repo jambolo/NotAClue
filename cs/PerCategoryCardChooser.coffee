@@ -38,9 +38,11 @@ class PerCategoryCardChooser extends Component
     super(props)
     @state =
       currentTab: 0
+    return
 
   handleChangeTab: (event, currentTab) =>
     @setState({ currentTab });
+    return
 
   makeChangeEventHandler: (typeId) =>
     (event) =>

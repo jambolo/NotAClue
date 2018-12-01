@@ -18,12 +18,23 @@ class HandDialog extends Component
     @state =
       playerId: null
       cardIds: []
+    return
+
+  close: ->
+    @setState({ playerId: null, cardIds:[] })
+    @props.onClose()
+    return
 
   stateIsOk: ->
     @state.playerId? and @state.cardIds.length > 0
 
+  handleClose: =>
+    @close()
+    return
+
   handleChangePlayer: (playerId) =>
     @setState({ playerId })
+    return
 
   handleChangeCards: (cardId, selected) =>
     if selected
@@ -34,22 +45,23 @@ class HandDialog extends Component
       @setState((state, props) -> 
         if cardId in state.cardIds then { cardIds : (id for id in state.cardIds when id isnt cardId) } else null
       )
+    return
 
   handleDone: =>
     if @stateIsOk()
       @props.app.recordHand(@state.playerId, @state.cardIds)
-      @setState({ playerId: null, cardIds:[] })
-      @props.onClose()
+      @close()
     else
       @props.app.showConfirmDialog("Error", "You must select a player and at least one card")
+    return
 
   handleCancel: =>
-    @setState({ playerId: null, cardIds:[] })
-    @props.onClose()
+    @close()
+    return
 
   render: ->
     { open, players, configuration } = @props
-    <Dialog open={open} fullscreen="true" onClose={@handleCancel}>
+    <Dialog open={open} fullscreen="true" disableBackdropClick={true} onClose={@handleClose}>
       <DialogTitle id="form-dialog-title">Record Your Hand</DialogTitle>
       <DialogContent>
         <Typography variant="h6">Which player are you?</Typography>

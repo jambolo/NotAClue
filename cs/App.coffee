@@ -1,15 +1,15 @@
 `
 import Solver from './Solver'
-import TopBar from './TopBar'
 
 import AccuseDialog from './AccuseDialog'
-import Button from '@material-ui/core/Button';
+import CommlinkDialog from './CommlinkDialog'
 import ConfirmDialog from './ConfirmDialog'
-import CurrentState from './CurrentState'
-import Divider from '@material-ui/core/Divider'
+import ExportDialog from './ExportDialog'
 import HandDialog from './HandDialog'
+import ImportDialog from './ImportDialog'
 import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
+import MainView from './MainView'
 import React, { Component } from 'react';
 import SetupDialog from './SetupDialog'
 import ShowDialog from './ShowDialog'
@@ -48,8 +48,6 @@ classic =
     ballroom:     { name: "Ballroom",        type: "room"    }
     hall:         { name: "Hall",            type: "room"    }
   suggestionOrder: [ "suspect", "weapon", "room" ]
-
-
 
 master_detective =
   name:       "Master Detective"
@@ -126,32 +124,110 @@ haunted_mansion =
     chamber:      { name: "Portrait Chamber", type: "room"  }
   suggestionOrder: [ "ghost", "guest", "room" ]
 
+star_wars =
+  name:       "Clue: Star Wars Edition"
+  rulesId:    "star_wars"
+  minPlayers: 3
+  maxPlayers: 6
+  types:
+    planet: { title: "Planets", preposition: "Darth Vader is targeting ", article: ""     }
+    room:   { title: "Rooms",  preposition: ", the plans are in ",       article: "the " }
+    ship:   { title: "Ships", preposition: ", and we can escape in ",    article: "a " }
+  cards:
+    alderaan:   { name: "Alderaan",               type: "planet" }
+    bespin:     { name: "Bespin",                 type: "planet" }
+    dagobah:    { name: "Dagobah",                type: "planet" }
+    endor:      { name: "Endor",                  type: "planet" }
+    tattoine:   { name: "Tatooine",               type: "planet" }
+    yavin:      { name: "Yavin 4",                type: "planet" }
+    millenium:  { name: "Millenium Falcon",       type: "ship"   }
+    xwing:      { name: "X-Wing",                 type: "ship"   }
+    ywing:      { name: "Y-Wing",                 type: "ship"   }
+    tiefighter: { name: "Tie Fighter",            type: "ship"   }
+    pod:        { name: "Escape Pod",             type: "ship"   }
+    tiebomber:  { name: "Tie Bomber",             type: "ship"   }
+    laser:      { name: "Laser Control Room",     type: "room"   }
+    overbridge: { name: "Overbridge",             type: "room"   }
+    docking:    { name: "Docking Bay",            type: "room"   }
+    red:        { name: "Red Control Room",       type: "room"   }
+    war:        { name: "War Room",               type: "room"   }
+    detention:  { name: "Detention Block",        type: "room"   }
+    throne:     { name: "Throne Room",            type: "room"   }
+    trash:      { name: "Trash Compactor",        type: "room"   }
+    tractor:    { name: "Tractor Beam Generator", type: "room"   }
+  suggestionOrder: [ "planet", "room", "ship" ]
+
 configurations =
   classic:          classic
   master_detective: master_detective
   haunted_mansion:  haunted_mansion
+  star_wars:        star_wars
 
 class App extends Component
   constructor: (props) ->
     super(props)
+    @solver =       null
+    @accusationId = 1
+    @commlinkId =   1
+    @suggestionId = 1
     @state =
-      playerIds:          []
-      configurationId:    "master_detective"
-      solver:             null
-      log:                []
-      mainMenuAnchor:     null
-      handDialogOpen:     false
-      suggestDialogOpen:  false
-      showDialogOpen:     false
-      accuseDialogOpen:   false
-      newGameDialogOpen:  false
+      playerIds:         []
+      configurationId:   "master_detective"
+      log:               []
+      mainMenuAnchor:    null
+      newGameDialogOpen: false
+      logDialogOpen:     false
       confirmDialog:
         open:      false
         title:     ''
         question:  ''
         yesAction: null
         noAction:  null
-      logDialogOpen:       false
+      handDialogOpen:    false
+      suggestDialogOpen: false
+      showDialogOpen:    false
+      accuseDialogOpen:  false
+    return
+
+  newGame: (configurationId, playerIds) ->
+    @solver =       new Solver(configurations[configurationId], playerIds)
+    @accusationId = 1
+    @suggestionId = 1
+    @setState({
+      playerIds:       playerIds
+      configurationId: configurationId
+      log:             [@setupLogEntry(configurationId, playerIds)]
+    })
+    return
+
+  importLog: (imported) ->
+    importedLog = JSON.parse(imported)
+    if importedLog.length == 0
+      @solver = null
+      return
+
+    setup = importedLog[0].setup
+    @newGame(setup.variation, setup.players)
+
+    for entry in importedLog[1..]
+      if entry.hand?
+        { player, cards } = entry.hand
+        @recordHand(player, cards)
+      else if entry.suggest? 
+        { suggester, cards, showed } = entry.suggest
+        @recordSuggestion(suggester, cards, showed)
+      else if entry.show?
+        { player, card } = entry.show
+        @recordShow(player, card)
+      else if entry.accuse?
+        { accuser, cards, outcome } = entry.accuse
+        @recordAccusation(accuser, cards, outcome)
+      else if entry.commlink? and setup.variation is "star_wars"
+        { caller, receiver, cards, showed } = entry.commlink
+        @recordCommlink(caller, receiver, cards, showed)
+      else
+        console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
+    return
 
   setupLogEntry: (configurationId, playerIds) ->
     { 
@@ -160,103 +236,27 @@ class App extends Component
         players:   playerIds
     }
 
-  logHandEntry: (playerId, cardIds) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          hand:
-            player: playerId
-            cards:  cardIds
-        }])
-      }
-    )
+  # Component launchers
 
-  logSuggestEntry: (suggesterId, cardIds, showedIds) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          suggest:
-            suggester: suggesterId
-            cards:     cardIds
-            showed:    showedIds
-        }])
-      }
-    )
-
-  logShowEntry: (playerId, cardId) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          show:
-              player: playerId
-              card:   cardId
-        }])
-      }
-    )
-
-  logAccuseEntry: (accuserId, cardIds, outcome) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          accuse:
-            accuser: accuserId
-            cards:   cardIds
-            outcome: outcome
-        }])
-      }
-    )
-
-  newGame: (configurationId, playerIds) =>
-    @setState({
-      playerIds:       playerIds
-      configurationId: configurationId
-      solver:          new Solver(configurations[configurationId], playerIds)
-      log:             [@setupLogEntry(configurationId, playerIds)]
-    })
-
-  clearGame: =>
-    @setState({ solver: null, progress: 0 , log: []})
-
-  recordHand: (playerId, cardIds) =>
-    if @state.solver?
-      @state.solver.hand(playerId, cardIds) 
-      @logHandEntry(playerId, cardIds)
-
-  recordSuggestion: (suggesterId, cardIds, showedIds) =>
-    if @state.solver?
-      @state.solver.suggest(suggesterId, cardIds, showedIds, @state.progress)
-      @logSuggestEntry(suggesterId, cardIds, showedIds)
-
-  recordShown: (playerId, cardId) =>
-    if @state.solver?
-      @state.solver.show(playerId, cardId)
-      @logShowEntry(playerId, cardId)
-
-  recordAccusation: (accuserId, cardIds, outcome) =>
-    if @state.solver?
-      @state.solver.accuse(accuserId, cardIds, outcome)
-      @logAccuseEntry(accuserId, cardIds, outcome)
-
-  showMainMenu: (anchor) ->
+  showMainMenu: (anchor) =>
     @setState({ mainMenuAnchor: anchor })
+    return
 
   showNewGameDialog: =>
     @setState({ newGameDialogOpen: true })
+    return
 
-  showHandDialog: =>
-    @setState({ handDialogOpen: true })
-
-  showSuggestDialog: =>
-    @setState({ suggestDialogOpen: true })    
-
-  showShowDialog: =>
-    @setState({ showDialogOpen: true })
-
-  showAccuseDialog: =>
-    @setState({ accuseDialogOpen: true })
+  showImportDialog: =>
+    @setState({ importDialogOpen: true })
+    return
 
   showLog: =>
     @setState({ logDialogOpen: true })
+    return
+
+  showExportDialog: =>
+    @setState({ exportDialogOpen: true })
+    return
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
     @setState({ 
@@ -268,34 +268,136 @@ class App extends Component
         noAction
       }
     })
+    return
 
-  handleConfirmDialogClose: =>
-    @setState({ 
-      confirmDialog: 
-        open:      false
-        title:     ''
-        question:  ''
-        yesAction: null
-        noAction:  null 
-    })
+  showHandDialog: =>
+    @setState({ handDialogOpen: true })
+    return
+
+  showSuggestDialog: =>
+    @setState({ suggestDialogOpen: true })    
+    return
+
+  showShowDialog: =>
+    @setState({ showDialogOpen: true })
+    return
+
+  showAccuseDialog: =>
+    @setState({ accuseDialogOpen: true })
+    return
+
+  showCommlinkDialog: =>
+    @setState({ commlinkDialogOpen: true })
+    return
+
+  # Solver state updaters
+
+  recordHand: (playerId, cardIds) ->
+    if @solver?
+      @solver.hand(playerId, cardIds) 
+      @logHandEntry(playerId, cardIds)
+    return
+
+  logHandEntry: (playerId, cardIds) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          hand:
+            player: playerId
+            cards:  cardIds
+        }])
+      }
+    )
+    return
+
+  recordSuggestion: (suggesterId, cardIds, showedIds) ->
+    if @solver?
+      id = @suggestionId++
+      @solver.suggest(suggesterId, cardIds, showedIds, id)
+      @logSuggestEntry(suggesterId, cardIds, showedIds, id)
+    return
+
+  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          suggest:
+            id:        id
+            suggester: suggesterId
+            cards:     cardIds
+            showed:    showedIds
+        }])
+      }
+    )
+    return
+
+  recordShown: (playerId, cardId) ->
+    if @solver?
+      @solver.show(playerId, cardId)
+      @logShowEntry(playerId, cardId)
+    return
+
+  logShowEntry: (playerId, cardId) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          show:
+              player: playerId
+              card:   cardId
+        }])
+      }
+    )
+    return
+
+  recordAccusation: (accuserId, cardIds, outcome) ->
+    if @solver?
+      id = @accusationId++
+      @solver.accuse(accuserId, cardIds, outcome, id)
+      @logAccuseEntry(accuserId, cardIds, outcome, id)
+    return
+
+  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          accuse:
+            id:      id
+            accuser: accuserId
+            cards:   cardIds
+            outcome: outcome
+        }])
+      }
+    )
+    return
+
+  recordCommlink: (callerId, receiverId, cardIds, showed) ->
+    if @solver?
+      id = @commlinkId++
+      @solver.commlink(callerId, receiverId, cardIds, showed, id)
+      @logCommlinkEntry(callerId, receiverId, cardIds, showed, id)
+    return
+
+  logCommlinkEntry: (callerId, receiverId, cardIds, showed, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          commlink:
+            id:       id
+            caller:   callerId
+            receiver: receiverId
+            cards:    cardIds
+            showed:   showed
+        }])
+      }
+    )
+    return
 
   render: ->
     <div className="App">
-      <TopBar app={this} />
-      {
-        if @state.solver?
-          <div>
-            <Button variant="contained" color="primary" onClick={@showHandDialog}>Hand</Button>
-            <Button variant="contained" color="primary" onClick={@showSuggestDialog}>Suggest</Button>
-            <Button variant="contained" color="primary" onClick={@showShowDialog}>Show</Button>
-            <Button variant="contained" color="primary" onClick={@showAccuseDialog}>Accuse</Button>
-            <Divider />
-            <CurrentState solver={@state.solver} app={this} /> 
-          </div>
-      }
+      <MainView configurationId={@state.configurationId} solver={@solver} app={this} />
       <MainMenu
         anchor={@state.mainMenuAnchor}
-        enableShowLog={@state.log? and @state.log.length > 0}
+        started={@solver?}
         onClose={() => @setState({ mainMenuAnchor: null })}
         app={this}
       />
@@ -303,6 +405,34 @@ class App extends Component
         open={@state.newGameDialogOpen}
         configurations={configurations}
         onClose={() => @setState({ newGameDialogOpen: false })}
+        app={this}
+      />
+      <ImportDialog
+        open={@state.importDialogOpen}
+        configurations={configurations}
+        onClose={() => @setState({ importDialogOpen: false })}
+        app={this}
+      />
+      <LogDialog
+        open={@state.logDialogOpen}
+        log={@state.log}
+        configurations={configurations}
+        onClose={() => @setState({ logDialogOpen: false })}
+        app={this}
+      />
+      <ExportDialog
+        open={@state.exportDialogOpen}
+        log={@state.log}
+        onClose={() => @setState({ exportDialogOpen: false })}
+        app={this}
+      />
+      <ConfirmDialog
+        open={@state.confirmDialog.open}
+        title={@state.confirmDialog.title}
+        question={@state.confirmDialog.question}
+        yesAction={@state.confirmDialog.yesAction}
+        noAction={@state.confirmDialog.noAction}
+        onClose={@handleConfirmDialogClose}
         app={this}
       />
       <HandDialog
@@ -333,22 +463,27 @@ class App extends Component
         onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />
-      <LogDialog
-        open={@state.logDialogOpen}
-        log={@state.log}
-        configurations={configurations}
-        onClose={() => @setState({ logDialogOpen: false })}
-        app={this}
-      />
-      <ConfirmDialog
-        open={@state.confirmDialog.open}
-        title={@state.confirmDialog.title}
-        question={@state.confirmDialog.question}
-        yesAction={@state.confirmDialog.yesAction}
-        noAction={@state.confirmDialog.noAction}
-        onClose={@handleConfirmDialogClose}
+      <CommlinkDialog
+        open={@state.commlinkDialogOpen}
+        configuration={configurations[@state.configurationId]}
+        players={@state.playerIds}
+        onClose={() => @setState({ commlinkDialogOpen: false })}
         app={this}
       />
     </div>
+
+  # Callbacks
+  
+  handleConfirmDialogClose: =>
+    @setState({ 
+      confirmDialog: 
+        open:      false
+        title:     ""
+        question:  ""
+        yesAction: null
+        noAction:  null 
+    })
+    return
+
 
 export default App
