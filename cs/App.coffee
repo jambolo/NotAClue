@@ -162,11 +162,6 @@ class App extends Component
     })
     return
 
-  clearGame: ->
-    @solver = null
-    @setState({ log: [] })
-    return
-
   setupLogEntry: (configurationId, playerIds) ->
     { 
       setup:
