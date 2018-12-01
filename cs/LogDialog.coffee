@@ -85,6 +85,10 @@ class LogDialog extends Component
     "#{info.accuser} made an accusation: #{suggestedCardsClause(info.cards, @configuration)}.
      The accusation was #{if info.outcome then "" else "not "}correct."
 
+   describeCommlink: (info) ->
+    "#{info.caller} asked #{info.receiver} about #{suggestedCardsClause(info.cards, @configuration)}.
+     #{info.subject} #{if info.showed then "showed" else "did not show"} a card."
+
   describeEntry: (entry) ->
     if entry.setup?
       @describeSetup(entry.setup)
@@ -96,6 +100,8 @@ class LogDialog extends Component
       @describeShow(entry.show)
     else if entry.accuse?
       @describeAccuse(entry.accuse)
+    else if entry.commlink?
+      @describeCommlink(entry.commlink)
     else
       alert("Unknown log entry")
 

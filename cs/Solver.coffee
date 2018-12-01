@@ -82,6 +82,17 @@ class Solver
     changed = @makeOtherDeductions(changed)
     return changed
 
+  commlink: (callerId, receiverId, cardIds, showed, id) ->
+    @discoveriesLog = []
+
+    comm = { id, callerId, receiverId, cardIds, showed }
+    @commlinks.push(comm)
+
+    changed = false
+    changed = @deduceFromCommlink(comm, changed)
+    changed = @makeOtherDeductions(changed)
+    return changed
+
   # If the player must hold one of the cards, but we know it doesn't hold all but one, then that one must be the one that is held
   playerMustHoldOne: (playerId, cardIds) ->
     player = @players[playerId]
@@ -238,6 +249,27 @@ class Solver
           changed = @disassociatePlayerWithCards(playerId, cardIds, changed)
     return changed
 
+  deduceFromCommlink: (comm, changed) ->
+    { id, receiverId, cardIds, showed } = comm
+
+    # You can deduce from an commlink that:
+    #  If the the receiver showed a card, then if they don't have two of them, then they must have the third
+    #  Otherwise, the receiver has none of the cards
+
+    if showed
+      # If the player does not hold all but one of cards, the player must hold the one.
+      mustHoldId = @playerMustHoldOne(receiverId, cardIds)
+      if mustHoldId isnt null
+        @addDiscovery(receiverId, mustHoldId, true, "showed a card in commlink #" + id + ", and does not hold the others")
+        changed = @associatePlayerWithCard(receiverId, mustHoldId, changed)
+    else
+      # The receiver has none of the cards
+      @addDiscoveries(receiverId, cardIds, false, "did not show a card in commlink #" + id)
+      changed = @disassociatePlayerWithCards(receiverId, cardIds, changed)
+    return changed
+
+
+
   makeOtherDeductions: (changed) ->
     @addCardHoldersToDiscoveries()
     changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
@@ -247,6 +279,7 @@ class Solver
       changed = false
       changed = @deduceFromSuggestion(suggestion, changed) for suggestion in @suggestions
       changed = @deduceFromAccusation(accusation, changed) for accusation in @accusations
+      changed = @deduceFromCommlink(commlink, changed) for commlink in @commlinks
       @addCardHoldersToDiscoveries()
       changed = @checkThatAnswerHoldsExactlyOneOfEach(changed)
 

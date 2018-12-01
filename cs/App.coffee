@@ -2,6 +2,7 @@
 import Solver from './Solver'
 
 import AccuseDialog from './AccuseDialog'
+import CommlinkDialog from './CommlinkDialog'
 import ConfirmDialog from './ConfirmDialog'
 import ExportDialog from './ExportDialog'
 import HandDialog from './HandDialog'
@@ -123,16 +124,51 @@ haunted_mansion =
     chamber:      { name: "Portrait Chamber", type: "room"  }
   suggestionOrder: [ "ghost", "guest", "room" ]
 
+star_wars =
+  name:       "Clue: Star Wars Edition"
+  rulesId:    "star_wars"
+  minPlayers: 3
+  maxPlayers: 6
+  types:
+    planet: { title: "Planets", preposition: "Darth Vader is targeting ", article: ""     }
+    room:   { title: "Rooms",  preposition: ", the plans are in ",       article: "the " }
+    ship:   { title: "Ships", preposition: ", and we can escape in ",    article: "a " }
+  cards:
+    alderaan:   { name: "Alderaan",               type: "planet" }
+    bespin:     { name: "Bespin",                 type: "planet" }
+    dagobah:    { name: "Dagobah",                type: "planet" }
+    endor:      { name: "Endor",                  type: "planet" }
+    tattoine:   { name: "Tatooine",               type: "planet" }
+    yavin:      { name: "Yavin 4",                type: "planet" }
+    millenium:  { name: "Millenium Falcon",       type: "ship"   }
+    xwing:      { name: "X-Wing",                 type: "ship"   }
+    ywing:      { name: "Y-Wing",                 type: "ship"   }
+    tiefighter: { name: "Tie Fighter",            type: "ship"   }
+    pod:        { name: "Escape Pod",             type: "ship"   }
+    tiebomber:  { name: "Tie Bomber",             type: "ship"   }
+    laser:      { name: "Laser Control Room",     type: "room"   }
+    overbridge: { name: "Overbridge",             type: "room"   }
+    docking:    { name: "Docking Bay",            type: "room"   }
+    red:        { name: "Red Control Room",       type: "room"   }
+    war:        { name: "War Room",               type: "room"   }
+    detention:  { name: "Detention Block",        type: "room"   }
+    throne:     { name: "Throne Room",            type: "room"   }
+    trash:      { name: "Trash Compactor",        type: "room"   }
+    tractor:    { name: "Tractor Beam Generator", type: "room"   }
+  suggestionOrder: [ "planet", "room", "ship" ]
+
 configurations =
   classic:          classic
   master_detective: master_detective
   haunted_mansion:  haunted_mansion
+  star_wars:        star_wars
 
 class App extends Component
   constructor: (props) ->
     super(props)
     @solver =       null
     @accusationId = 1
+    @commlinkId =   1
     @suggestionId = 1
     @state =
       playerIds:         []
@@ -186,6 +222,9 @@ class App extends Component
       else if entry.accuse?
         { accuser, cards, outcome } = entry.accuse
         @recordAccusation(accuser, cards, outcome)
+      else if entry.commlink? and setup.variation is "star_wars"
+        { caller, receiver, cards, showed } = entry.commlink
+        @recordCommlink(caller, receiver, cards, showed)
       else
         console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
     return
@@ -245,6 +284,10 @@ class App extends Component
 
   showAccuseDialog: =>
     @setState({ accuseDialogOpen: true })
+    return
+
+  showCommlinkDialog: =>
+    @setState({ commlinkDialogOpen: true })
     return
 
   # Solver state updaters
@@ -327,6 +370,28 @@ class App extends Component
     )
     return
 
+  recordCommlink: (callerId, receiverId, cardIds, showed) ->
+    if @solver?
+      id = @commlinkId++
+      @solver.commlink(callerId, receiverId, cardIds, showed, id)
+      @logCommlinkEntry(callerId, receiverId, cardIds, showed, id)
+    return
+
+  logCommlinkEntry: (callerId, receiverId, cardIds, showed, id) ->
+    @setState((state, props) -> 
+      { 
+        log: state.log.concat([{
+          commlink:
+            id:       id
+            caller:   callerId
+            receiver: receiverId
+            cards:    cardIds
+            showed:   showed
+        }])
+      }
+    )
+    return
+
   render: ->
     <div className="App">
       <MainView configurationId={@state.configurationId} solver={@solver} app={this} />
@@ -340,6 +405,12 @@ class App extends Component
         open={@state.newGameDialogOpen}
         configurations={configurations}
         onClose={() => @setState({ newGameDialogOpen: false })}
+        app={this}
+      />
+      <ImportDialog
+        open={@state.importDialogOpen}
+        configurations={configurations}
+        onClose={() => @setState({ importDialogOpen: false })}
         app={this}
       />
       <LogDialog
@@ -390,6 +461,13 @@ class App extends Component
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
         onClose={() => @setState({ accuseDialogOpen: false })}
+        app={this}
+      />
+      <CommlinkDialog
+        open={@state.commlinkDialogOpen}
+        configuration={configurations[@state.configurationId]}
+        players={@state.playerIds}
+        onClose={() => @setState({ commlinkDialogOpen: false })}
         app={this}
       />
     </div>
