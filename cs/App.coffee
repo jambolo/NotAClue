@@ -162,7 +162,12 @@ class App extends Component
     })
     return
 
-  setupLogEntry: (configurationId, playerIds) ->
+clearGame: ->
+    @solver = null
+    @setState({ log: [] })
+    return
+
+setupLogEntry: (configurationId, playerIds) ->
     { 
       setup:
         variation: configurationId
