@@ -27,7 +27,7 @@ transcribedList = (list) ->
   return string
 
 playerList = (playerIds) ->
-  return transcribedList(playerIds)    
+  if playerIds.length > 0 then transcribedList(playerIds) else "Nobody"
 
 cardList = (cardIds, configuration) ->
   cards = configuration.cards
@@ -51,25 +51,41 @@ class LogDialog extends Component
     @configuration = null
     return
 
-  describeSetup: (info) =>
+  describeSetup: (info) ->
     "Playing #{@configuration.name} with #{playerList(info.players)}."
 
-  describeHand: (info) =>
+  describeHand: (info) ->
     "#{info.player} has #{cardList(info.cards, @configuration)}."
 
-  describeSuggest: (info) =>
-    "#{info.suggester} suggested #{suggestedCardsClause(info.cards, @configuration)}.
+  describeSuggest: (info) ->
+    if @configuration.rules is "master"
+      @describeSuggestMaster(info)
+    else
+      @describeSuggestClassic(info)
+
+  describeSuggestMaster: (info) ->
+    "#{info.suggester} suggested: #{suggestedCardsClause(info.cards, @configuration)}.
      #{playerList(info.showed)} showed a card."
 
-  describeShow: (info) =>
+  describeSuggestClassic: (info) ->
+    description = "#{info.suggester} suggested #{suggestedCardsClause(info.cards, @configuration)}."
+    if info.showed.length > 0
+      if info.showed.length > 1
+        description += " #{playerList(info.showed[0...-1])} did not show a card."
+      description += " #{info.showed[info.showed.length-1]} showed a card."
+    else
+      description += " Nobody showed a card."
+    return description
+
+  describeShow: (info) ->
     cards = @configuration.cards
     "#{info.player} showed #{cardPhrase(cards[info.card], @configuration, false)}."
 
-  describeAccuse: (info) =>
-    "#{info.accuser} accused #{suggestedCardsClause(info.cards, @configuration)}.
+  describeAccuse: (info) ->
+    "#{info.accuser} made an accusation: #{suggestedCardsClause(info.cards, @configuration)}.
      The accusation was #{if info.outcome then "" else "not "}correct."
 
-  describeEntry: (entry) =>
+  describeEntry: (entry) ->
     if entry.setup?
       @describeSetup(entry.setup)
     else if entry.hand?
