@@ -3,6 +3,7 @@ import Solver from './Solver'
 
 import AccuseDialog from './AccuseDialog'
 import ConfirmDialog from './ConfirmDialog'
+import ExportDialog from './ExportDialog'
 import HandDialog from './HandDialog'
 import LogDialog from './LogDialog'
 import MainMenu from './MainMenu'
@@ -162,12 +163,7 @@ class App extends Component
     })
     return
 
-clearGame: ->
-    @solver = null
-    @setState({ log: [] })
-    return
-
-setupLogEntry: (configurationId, playerIds) ->
+  setupLogEntry: (configurationId, playerIds) ->
     { 
       setup:
         variation: configurationId
@@ -186,6 +182,10 @@ setupLogEntry: (configurationId, playerIds) ->
 
   showLog: =>
     @setState({ logDialogOpen: true })
+    return
+
+  showExportDialog: =>
+    @setState({ exportDialogOpen: true })
     return
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
@@ -316,6 +316,12 @@ setupLogEntry: (configurationId, playerIds) ->
         log={@state.log}
         configurations={configurations}
         onClose={() => @setState({ logDialogOpen: false })}
+        app={this}
+      />
+      <ExportDialog
+        open={@state.exportDialogOpen}
+        log={@state.log}
+        onClose={() => @setState({ exportDialogOpen: false })}
         app={this}
       />
       <ConfirmDialog
