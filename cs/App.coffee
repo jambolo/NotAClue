@@ -125,7 +125,7 @@ haunted_mansion =
   suggestionOrder: [ "ghost", "guest", "room" ]
 
 star_wars =
-  name:       "Clue: Star Wars Edition"
+  name:       "Star Wars"
   rulesId:    "star_wars"
   minPlayers: 3
   maxPlayers: 6
@@ -157,11 +157,45 @@ star_wars =
     tractor:    { name: "Tractor Beam Generator", type: "room"   }
   suggestionOrder: [ "planet", "room", "ship" ]
 
+harry_potter =
+  name:       "Harry Potter"
+  rulesId:    "classic"
+  minPlayers: 3
+  maxPlayers: 6
+  types:
+    suspect: { title: "Suspects", preposition: "", article: ""     }
+    item:    { title: "Items",    preposition: "with ",  article: "a " }
+    room:    { title: "Rooms",    preposition: "in ",    article: "the " }
+  cards:
+    draco:       { name: "Draco Malfoy",              type: "suspect" }
+    crabbe:      { name: "Crabbe & Doyle",            type: "suspect" }
+    lucius:      { name: "Lucius Malfoy",             type: "suspect" }
+    delores:     { name: "Delores Umbridge",          type: "suspect" }
+    peter:       { name: "Peter Pettigrew",           type: "suspect" }
+    bellatrix:   { name: "Bellatrix LeStrange",       type: "suspect" }
+    draught:     { name: "Sleeping Draught",          type: "item"   }
+    cabinet:     { name: "Vanishing Cabinet",         type: "item"   }
+    portkey:     { name: "Portkey",                   type: "item"   }
+    impedimenta: { name: "Impedienta",                type: "item"   }
+    petrifus:    { name: "Petrifus Totalus",          type: "item"   }
+    mandarke:    { name: "Mandrake",                  type: "item"   }
+    hall:        { name: "Great Hall",                type: "room"   }
+    hospital:    { name: "Hospital Wing",             type: "room"   }
+    requirement: { name: "Room of Requirement",       type: "room"   }
+    potions:     { name: "Potions ClassRoom",         type: "room"   }
+    trophy:      { name: "Trophy Room",               type: "room"   }
+    divination:  { name: "Divination Classroom",      type: "room"   }
+    owlry:       { name: "Owlry",                     type: "room"   }
+    library:     { name: "Library",                   type: "room"   }
+    defense:     { name: "Defense Against Dark Arts", type: "room"   }
+  suggestionOrder: [ "suspect", "item", "room" ]
+
 configurations =
   classic:          classic
   master_detective: master_detective
   haunted_mansion:  haunted_mansion
   star_wars:        star_wars
+  harry_potter:     harry_potter
 
 class App extends Component
   constructor: (props) ->
