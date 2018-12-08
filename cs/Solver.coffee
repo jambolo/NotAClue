@@ -27,14 +27,15 @@ class Player
 class Solver
   constructor: (configuration, playerIds) ->
     @ANSWER_PLAYER_ID = "ANSWER" # The answer is treated as a player
-    @rulesId = configuration.rulesId
-    @types = configuration.types
-    @cards = {}
-    @players = {}
+    @rulesId        = configuration.rulesId
+    @types          = configuration.types
+    @cards          = {}
+    @players        = {}
     @discoveriesLog = []
-    @suggestions = []
-    @accusations = []
-    @facts = []
+    @suggestions    = []
+    @accusations    = []
+    @commlinks      = []
+    @facts          = []
 
     cardIds = (id for id, info of configuration.cards)
 

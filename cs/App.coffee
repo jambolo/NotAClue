@@ -210,7 +210,9 @@ class App extends Component
       log:               []
       mainMenuAnchor:    null
       newGameDialogOpen: false
+      importDialogOpen:   false
       logDialogOpen:     false
+      exportDialogOpen:   false
       confirmDialog:
         open:      false
         title:     ''
@@ -221,12 +223,14 @@ class App extends Component
       suggestDialogOpen: false
       showDialogOpen:    false
       accuseDialogOpen:  false
+      commlinkDialogOpen: false
     return
 
   newGame: (configurationId, playerIds) ->
-    @solver =       new Solver(configurations[configurationId], playerIds)
-    @accusationId = 1
-    @suggestionId = 1
+    @solver          = new Solver(configurations[configurationId], playerIds)
+    @accusationId    = 1
+    @commlinkId      = 1
+    @suggestionId    = 1
     @setState({
       playerIds:       playerIds
       configurationId: configurationId
