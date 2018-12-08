@@ -200,16 +200,16 @@ configurations =
 class App extends Component
   constructor: (props) ->
     super(props)
-    @solver =       null
-    @accusationId = 1
-    @commlinkId =   1
-    @suggestionId = 1
-    @state =
-      playerIds:         []
-      configurationId:   "master_detective"
-      log:               []
-      mainMenuAnchor:    null
-      newGameDialogOpen: false
+    @solver          = null
+    @accusationId    = 1
+    @commlinkId      = 1
+    @suggestionId    = 1
+    @playerIds       = []
+    @configurationId = "master_detective"
+    @log             = []
+    @state           =
+      mainMenuAnchor:     null
+      newGameDialogOpen:  false
       importDialogOpen:   false
       logDialogOpen:      false
       exportDialogOpen:   false
@@ -231,11 +231,9 @@ class App extends Component
     @accusationId    = 1
     @commlinkId      = 1
     @suggestionId    = 1
-    @setState({
-      playerIds:       playerIds
-      configurationId: configurationId
-      log:             [@setupLogEntry(configurationId, playerIds)]
-    })
+    @playerIds       = playerIds
+    @configurationId = configurationId
+    @log             = [@makeSetupLogEntry(configurationId, playerIds)]
     return
 
   importLog: (imported) =>
@@ -267,7 +265,7 @@ class App extends Component
         console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
     return
 
-  setupLogEntry: (configurationId, playerIds) ->
+  makeSetupLogEntry: (configurationId, playerIds) ->
     { 
       setup:
         variation: configurationId
@@ -332,61 +330,61 @@ class App extends Component
   recordHand: (playerId, cardIds) =>
     if @solver?
       @solver.hand(playerId, cardIds) 
-      @log = @log.concat([
+      @log.push({
         hand:
           player: playerId
           cards:  cardIds
-      ])
+      })
     return
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @solver?
       id = @suggestionId++
       @solver.suggest(suggesterId, cardIds, showedIds, id)
-      @log = @log.concat([
+      @log.push({
         suggest:
           id:        id
           suggester: suggesterId
           cards:     cardIds
           showed:    showedIds
-      ])
+      })
     return
 
   recordShown: (playerId, cardId) =>
     if @solver?
       @solver.show(playerId, cardId)
-      @log = @log.concat([
+      @log.push({
         show:
             player: playerId
             card:   cardId
-      ])
+      })
     return
 
   recordAccusation: (accuserId, cardIds, correct) =>
     if @solver?
       id = @accusationId++
       @solver.accuse(accuserId, cardIds, correct, id)
-      @log = @log.concat([
+      @log.push({
         accuse:
           id:      id
           accuser: accuserId
           cards:   cardIds
           correct: correct
-      ])
+      })
     return
 
   recordCommlink: (callerId, receiverId, cardIds, showed) =>
     if @solver?
       id = @commlinkId++
       @solver.commlink(callerId, receiverId, cardIds, showed, id)
-      @log = @log.concat([
+      @log.push({
         commlink:
           id:       id
           caller:   callerId
           receiver: receiverId
           cards:    cardIds
           showed:   showed
-      ])
+      })
     return
 
   render: ->
@@ -414,14 +412,14 @@ class App extends Component
       />
       <LogDialog
         open={@state.logDialogOpen}
-        log={@state.log}
+        log={@log}
         configurations={configurations}
         onClose={() => @setState({ logDialogOpen: false })}
         app={this}
       />
       <ExportDialog
         open={@state.exportDialogOpen}
-        log={@state.log}
+        log={@log}
         onClose={() => @setState({ exportDialogOpen: false })}
         app={this}
       />
@@ -436,40 +434,40 @@ class App extends Component
       />
       <HandDialog
         open={@state.handDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
         onDone={@recordHand}
         onClose={() => @setState({ handDialogOpen: false })}
         app={this}
       />
       <SuggestDialog
         open={@state.suggestDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
         onDone={@recordSuggestion}
         onClose={() => @setState({ suggestDialogOpen: false })}
         app={this}
       />
       <ShowDialog
         open={@state.showDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
         onDone={@recordShown}
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
       <AccuseDialog
         open={@state.accuseDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
         onDone={@recordAccusation}
         onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />
       <CommlinkDialog
         open={@state.commlinkDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
         onDone={@recordCommlink}
         onClose={() => @setState({ commlinkDialogOpen: false })}
         app={this}
