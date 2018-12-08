@@ -10,7 +10,7 @@ import Typography from '@material-ui/core/Typography';
 TopBar = (props) ->
   <AppBar position="static">
     <Toolbar>
-      <IconButton color="inherit" onClick={(event) -> props.app.showMainMenu(event.currentTarget)}>
+      <IconButton color="inherit" onClick={(event) -> props.onMenu(event.currentTarget)}>
         <MenuIcon />
       </IconButton>
       <Typography variant="h6" color="inherit">

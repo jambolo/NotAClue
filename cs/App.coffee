@@ -211,7 +211,7 @@ class App extends Component
       mainMenuAnchor:    null
       newGameDialogOpen: false
       importDialogOpen:   false
-      logDialogOpen:     false
+      logDialogOpen:      false
       exportDialogOpen:   false
       confirmDialog:
         open:      false
@@ -219,14 +219,14 @@ class App extends Component
         question:  ''
         yesAction: null
         noAction:  null
-      handDialogOpen:    false
-      suggestDialogOpen: false
-      showDialogOpen:    false
-      accuseDialogOpen:  false
+      handDialogOpen:     false
+      suggestDialogOpen:  false
+      showDialogOpen:     false
+      accuseDialogOpen:   false
       commlinkDialogOpen: false
     return
 
-  newGame: (configurationId, playerIds) ->
+  setUpNewGame: (configurationId, playerIds) =>
     @solver          = new Solver(configurations[configurationId], playerIds)
     @accusationId    = 1
     @commlinkId      = 1
@@ -238,14 +238,14 @@ class App extends Component
     })
     return
 
-  importLog: (imported) ->
+  importLog: (imported) =>
     importedLog = JSON.parse(imported)
     if importedLog.length == 0
       @solver = null
       return
 
     setup = importedLog[0].setup
-    @newGame(setup.variation, setup.players)
+    @setUpNewGame(setup.variation, setup.players)
 
     for entry in importedLog[1..]
       if entry.hand?
@@ -256,7 +256,7 @@ class App extends Component
         @recordSuggestion(suggester, cards, showed)
       else if entry.show?
         { player, card } = entry.show
-        @recordShow(player, card)
+        @recordShown(player, card)
       else if entry.accuse?
         { accuser, cards, correct } = entry.accuse
         @recordAccusation(accuser, cards, correct)
@@ -298,13 +298,12 @@ class App extends Component
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
     @setState({ 
-      confirmDialog: {
+      confirmDialog:
         open: true
-        title
-        question
-        yesAction
-        noAction
-      }
+        title: title
+        question: question
+        yesAction: yesAction
+        noAction: noAction
     })
     return
 
@@ -313,7 +312,7 @@ class App extends Component
     return
 
   showSuggestDialog: =>
-    @setState({ suggestDialogOpen: true })    
+    @setState({ suggestDialogOpen: true })
     return
 
   showShowDialog: =>
@@ -330,109 +329,69 @@ class App extends Component
 
   # Solver state updaters
 
-  recordHand: (playerId, cardIds) ->
+  recordHand: (playerId, cardIds) =>
     if @solver?
       @solver.hand(playerId, cardIds) 
-      @logHandEntry(playerId, cardIds)
+      @log = @log.concat([
+        hand:
+          player: playerId
+          cards:  cardIds
+      ])
     return
 
-  logHandEntry: (playerId, cardIds) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          hand:
-            player: playerId
-            cards:  cardIds
-        }])
-      }
-    )
-    return
-
-  recordSuggestion: (suggesterId, cardIds, showedIds) ->
+  recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @solver?
       id = @suggestionId++
       @solver.suggest(suggesterId, cardIds, showedIds, id)
-      @logSuggestEntry(suggesterId, cardIds, showedIds, id)
+      @log = @log.concat([
+        suggest:
+          id:        id
+          suggester: suggesterId
+          cards:     cardIds
+          showed:    showedIds
+      ])
     return
 
-  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          suggest:
-            id:        id
-            suggester: suggesterId
-            cards:     cardIds
-            showed:    showedIds
-        }])
-      }
-    )
-    return
-
-  recordShown: (playerId, cardId) ->
+  recordShown: (playerId, cardId) =>
     if @solver?
       @solver.show(playerId, cardId)
-      @logShowEntry(playerId, cardId)
+      @log = @log.concat([
+        show:
+            player: playerId
+            card:   cardId
+      ])
     return
 
-  logShowEntry: (playerId, cardId) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          show:
-              player: playerId
-              card:   cardId
-        }])
-      }
-    )
-    return
-
-  recordAccusation: (accuserId, cardIds, correct) ->
+  recordAccusation: (accuserId, cardIds, correct) =>
     if @solver?
       id = @accusationId++
       @solver.accuse(accuserId, cardIds, correct, id)
-      @logAccuseEntry(accuserId, cardIds, correct, id)
+      @log = @log.concat([
+        accuse:
+          id:      id
+          accuser: accuserId
+          cards:   cardIds
+          correct: correct
+      ])
     return
 
-  logAccuseEntry: (accuserId, cardIds, correct, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          accuse:
-            id:      id
-            accuser: accuserId
-            cards:   cardIds
-            correct: correct
-        }])
-      }
-    )
-    return
-
-  recordCommlink: (callerId, receiverId, cardIds, showed) ->
+  recordCommlink: (callerId, receiverId, cardIds, showed) =>
     if @solver?
       id = @commlinkId++
       @solver.commlink(callerId, receiverId, cardIds, showed, id)
-      @logCommlinkEntry(callerId, receiverId, cardIds, showed, id)
-    return
-
-  logCommlinkEntry: (callerId, receiverId, cardIds, showed, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          commlink:
-            id:       id
-            caller:   callerId
-            receiver: receiverId
-            cards:    cardIds
-            showed:   showed
-        }])
-      }
-    )
+      @log = @log.concat([
+        commlink:
+          id:       id
+          caller:   callerId
+          receiver: receiverId
+          cards:    cardIds
+          showed:   showed
+      ])
     return
 
   render: ->
     <div className="App">
-      <MainView configurationId={@state.configurationId} solver={@solver} app={this} />
+      <MainView configurationId={@configurationId} solver={@solver} onMenu={@showMainMenu} app={this} />
       <MainMenu
         anchor={@state.mainMenuAnchor}
         started={@solver?}
@@ -442,12 +401,14 @@ class App extends Component
       <SetupDialog
         open={@state.newGameDialogOpen}
         configurations={configurations}
+        onDone={@setUpNewGame}
         onClose={() => @setState({ newGameDialogOpen: false })}
         app={this}
       />
       <ImportDialog
         open={@state.importDialogOpen}
         configurations={configurations}
+        onDone={@importLog}
         onClose={() => @setState({ importDialogOpen: false })}
         app={this}
       />
@@ -477,6 +438,7 @@ class App extends Component
         open={@state.handDialogOpen}
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
+        onDone={@recordHand}
         onClose={() => @setState({ handDialogOpen: false })}
         app={this}
       />
@@ -484,6 +446,7 @@ class App extends Component
         open={@state.suggestDialogOpen}
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
+        onDone={@recordSuggestion}
         onClose={() => @setState({ suggestDialogOpen: false })}
         app={this}
       />
@@ -491,6 +454,7 @@ class App extends Component
         open={@state.showDialogOpen}
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
+        onDone={@recordShown}
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
@@ -498,6 +462,7 @@ class App extends Component
         open={@state.accuseDialogOpen}
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
+        onDone={@recordAccusation}
         onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />
@@ -505,6 +470,7 @@ class App extends Component
         open={@state.commlinkDialogOpen}
         configuration={configurations[@state.configurationId]}
         players={@state.playerIds}
+        onDone={@recordCommlink}
         onClose={() => @setState({ commlinkDialogOpen: false })}
         app={this}
       />
@@ -525,3 +491,4 @@ class App extends Component
 
 
 export default App
+ 

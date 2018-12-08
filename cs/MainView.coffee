@@ -11,7 +11,7 @@ MainView = (props) ->
   { showHandDialog, showSuggestDialog, showShowDialog, showAccuseDialog, showCommlinkDialog } = app
 
   <div className="MainView">
-    <TopBar app={app} />
+    <TopBar onMenu={props.onMenu} />
     {
       if solver?
         <div>

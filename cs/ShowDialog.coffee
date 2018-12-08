@@ -48,7 +48,7 @@ class ShowDialog extends Component
     if not @stateIsOk()
       @props.app.showConfirmDialog("Error", "You must select a player and a card")
       return
-    @props.app.recordShown(@state.playerId, @state.cardId)
+    @props.onDone(@state.playerId, @state.cardId)
     @close()
     return
 

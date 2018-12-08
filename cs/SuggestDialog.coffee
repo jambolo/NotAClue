@@ -107,13 +107,13 @@ class SuggestDialog extends Component
     if @state.showedIds.length == 0
       @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed any cards?",
         () =>       
-          @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
+          @props.onDone(@state.suggesterId, cardIds, @state.showedIds)
           @close()
         ,
         () -> {}
       )
       return
-    @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.showedIds)
+    @props.onDone(@state.suggesterId, cardIds, @state.showedIds)
     @close()
     return
 
@@ -128,13 +128,13 @@ class SuggestDialog extends Component
     if not @state.showedIds[0]?
       @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed a card?",
         () =>       
-          @props.app.recordSuggestion(@state.suggesterId, cardIds, [])
+          @props.onDone(@state.suggesterId, cardIds, [])
           @close()
         ,
         () -> {}
       )
       return
-    @props.app.recordSuggestion(@state.suggesterId, cardIds, @state.didNotShowIds.concat(@state.showedIds))
+    @props.onDone(@state.suggesterId, cardIds, @state.didNotShowIds.concat(@state.showedIds))
     @close()
     return
 
