@@ -44,10 +44,10 @@ class Solver
     @players[p] = new Player(cardIds) for p in playerIdsIncludingAnswer
     @ANSWER = @players[@ANSWER_PLAYER_ID]
 
-  accuse: (accuserId, cardIds, outcome, id) ->
+  accuse: (accuserId, cardIds, correct, id) ->
     @discoveriesLog = []
 
-    accusation = { id, accuserId, cardIds, outcome }
+    accusation = { id, accuserId, cardIds, correct }
     @accusations.push(accusation)
 
     changed = false
@@ -142,7 +142,7 @@ class Solver
     return typeId in @types
 
   deduceFromAccusation: (accusation, changed) ->
-    { id, accuserId, cardIds, outcome } = accusation
+    { id, accuserId, cardIds, correct } = accusation
 
     # You can deduce from an accusation that:
     #    The accuser does not have the cards in the accusation.
@@ -153,7 +153,7 @@ class Solver
     @addDiscoveries(accuserId, cardIds, false, "stated these cards in accusation #" + id)
     changed = @disassociatePlayerWithCards(accuserId, cardIds, changed)
 
-    if outcome
+    if correct
       for cardId in cardIds
         changed = @associatePlayerWithCard(@ANSWER_PLAYER_ID, cardId, changed)
     else

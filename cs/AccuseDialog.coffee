@@ -22,17 +22,17 @@ class AccuseDialog extends Component
     @state =
       accuserId: null
       cardIds:   {}
-      outcome:   null
+      correct:   null
     return
 
   close: ->
-    @setState({ accuserId: null, cardIds: {}, outcome: null })
+    @setState({ accuserId: null, cardIds: {}, correct: null })
     @props.onClose()
     return
 
   stateIsOk: ->
     cardCount = (key for key of @state.cardIds).length
-    @state.accuserId? and cardCount == 3 and @state.outcome?
+    @state.accuserId? and cardCount == 3 and @state.correct?
 
   handleClose: =>
     @close()
@@ -51,7 +51,7 @@ class AccuseDialog extends Component
     return
 
   handleChangeOutcome: (event) =>
-    @setState({ outcome: event.target.value })
+    @setState({ correct: event.target.value })
     return
 
   handleCancel: =>
@@ -61,7 +61,7 @@ class AccuseDialog extends Component
   handleDone: =>
     if @stateIsOk()
       cardIds = (cardId for typeId, cardId of @state.cardIds)
-      @props.app.recordAccusation(@state.accuserId, cardIds, @state.outcome == "yes")
+      @props.onDone(@state.accuserId, cardIds, @state.correct == "yes")
       @close()
     else
       @props.app.showConfirmDialog("Error", "You must select an accuser, 3 cards, and the outcome.")

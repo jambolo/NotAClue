@@ -83,7 +83,7 @@ class LogDialog extends Component
 
   describeAccuse: (info) ->
     "#{info.accuser} made an accusation: #{suggestedCardsClause(info.cards, @configuration)}.
-     The accusation was #{if info.outcome then "" else "not "}correct."
+     The accusation was #{if info.correct then "" else "not "}correct."
 
    describeCommlink: (info) ->
     "#{info.caller} asked #{info.receiver} about #{suggestedCardsClause(info.cards, @configuration)}.

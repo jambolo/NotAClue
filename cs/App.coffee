@@ -254,8 +254,8 @@ class App extends Component
         { player, card } = entry.show
         @recordShow(player, card)
       else if entry.accuse?
-        { accuser, cards, outcome } = entry.accuse
-        @recordAccusation(accuser, cards, outcome)
+        { accuser, cards, correct } = entry.accuse
+        @recordAccusation(accuser, cards, correct)
       else if entry.commlink? and setup.variation is "star_wars"
         { caller, receiver, cards, showed } = entry.commlink
         @recordCommlink(caller, receiver, cards, showed)
@@ -383,14 +383,14 @@ class App extends Component
     )
     return
 
-  recordAccusation: (accuserId, cardIds, outcome) ->
+  recordAccusation: (accuserId, cardIds, correct) ->
     if @solver?
       id = @accusationId++
-      @solver.accuse(accuserId, cardIds, outcome, id)
-      @logAccuseEntry(accuserId, cardIds, outcome, id)
+      @solver.accuse(accuserId, cardIds, correct, id)
+      @logAccuseEntry(accuserId, cardIds, correct, id)
     return
 
-  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
+  logAccuseEntry: (accuserId, cardIds, correct, id) ->
     @setState((state, props) -> 
       { 
         log: state.log.concat([{
@@ -398,7 +398,7 @@ class App extends Component
             id:      id
             accuser: accuserId
             cards:   cardIds
-            outcome: outcome
+            correct: correct
         }])
       }
     )
