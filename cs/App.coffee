@@ -227,13 +227,14 @@ class App extends Component
     return
 
   setUpNewGame: (configurationId, playerIds) =>
-    @solver          = new Solver(configurations[configurationId], playerIds)
     @accusationId    = 1
     @commlinkId      = 1
     @suggestionId    = 1
     @playerIds       = playerIds
     @configurationId = configurationId
-    @log             = [@makeSetupLogEntry(configurationId, playerIds)]
+    @log             = []
+
+    @recordSetup(configurationId, playerIds)
     return
 
   importLog: (imported) =>
@@ -265,12 +266,6 @@ class App extends Component
         console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
     return
 
-  makeSetupLogEntry: (configurationId, playerIds) ->
-    { 
-      setup:
-        variation: configurationId
-        players:   playerIds
-    }
 
   # Component launchers
 
@@ -326,6 +321,14 @@ class App extends Component
     return
 
   # Solver state updaters
+
+  recordSetup: (configurationId, playerIds) =>
+    @solver = new Solver(configurations[configurationId], playerIds)
+    @log.push({ 
+      setup:
+        variation: configurationId
+        players:   playerIds
+    })
 
   recordHand: (playerId, cardIds) =>
     if @solver?
