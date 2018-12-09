@@ -238,32 +238,235 @@ class App extends Component
     return
 
   importLog: (imported) =>
-    importedLog = JSON.parse(imported)
-    if importedLog.length == 0
-      @solver = null
+
+    parsedLog = JSON.parse(imported)
+    if not parsedLog? or not parsedLog[0]? or not parsedLog[0].setup?
+      @showConfirmDialog(
+        "Import Error",
+        "The first entry in the log is not a \"setup\" entry."
+      )
       return
 
-    setup = importedLog[0].setup
-    @setUpNewGame(setup.variation, setup.players)
+    setup = parsedLog[0].setup
 
-    for entry in importedLog[1..]
+    # Parse the setup entry
+    if not setup.variation? or not setup.players?
+      @showConfirmDialog(
+        "Import Error",
+        "The setup entry must have a \"variation\" property and a \"players\" property."
+      )
+      return
+
+    { variation, players } = setup
+
+    if not configurations[variation]?
+      @showConfirmDialog(
+        "Import Error",
+        "The variation \"#{variation}\" is not supported. The following variations are supported: #{v for v of configurations}"
+      )
+      return
+
+    configuration = configurations[variation]
+
+    if players.length < configuration.minPlayers or players.length > configuration.maxPlayers
+      @showConfirmDialog(
+        "Import Error",
+        "This variation requires #{configuration.minPlayers} to #{configuration.maxPlayers} players."
+      )
+      return
+
+    if "ANSWER" in players or "Nobody" in players
+      @showConfirmDialog(
+        "Import Error",
+        "The uses of the names \"ANSWER\" and \"Nobody\" are reserved."
+      )
+      return
+
+    configuration = configurations[variation]
+
+    # Process the setup
+    @setUpNewGame(variation, players)
+
+    # Player and card lists for reporting errors
+    playerList = "#{p for p in players}"
+    cardList = "#{c for c of configuration.cards}"
+
+    # Process each entry that follows
+    for entry in parsedLog[1..]
+
+      # Hand entry
       if entry.hand?
-        { player, cards } = entry.hand
+        hand = entry.hand
+        if not hand.player? or not hand.cards?
+          @showConfirmDialog(
+            "Import Error",
+            "The hand entry must have a \"player\" property and a \"cards\" property."
+          )
+          return
+
+        { player, cards } = hand
+
+        if player not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for card in cards
+          if not configuration.cards[card]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{card}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+
         @recordHand(player, cards)
+
+      # Suggest entry
       else if entry.suggest? 
-        { suggester, cards, showed } = entry.suggest
+        suggestion = entry.suggest
+        if not suggestion.suggester? or not suggestion.cards? or not suggestion.showed?
+          @showConfirmDialog(
+            "Import Error",
+            "The suggest entry must have a \"suggester\" property, a \"cards\" property, and a \"showed\" property."
+          )
+          return
+
+        { suggester, cards, showed } = suggestion
+
+        if suggester not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{suggester}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        for s in showed
+          if s not in players
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{s}\" is not in the player list. Valid players are #{playerList}"
+            )
+            return
+
         @recordSuggestion(suggester, cards, showed)
+
+      # Show entry
       else if entry.show?
-        { player, card } = entry.show
+        show = entry.show
+        if not show.player? or not show.card?
+          @showConfirmDialog(
+            "Import Error",
+            "The show entry must have a \"player\" property, and a \"card\" property."
+          )
+          return
+
+        { player, card } = show
+
+        if player not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        if not configuration.cards[card]?
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{card}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+          )
+          return
+
         @recordShown(player, card)
+
+      # Accuse entry
       else if entry.accuse?
-        { accuser, cards, correct } = entry.accuse
+        accusation = entry.accuse
+        console.log(JSON.stringify(accusation))
+        console.log("")
+        if not accusation.accuser? or not accusation.cards? or not accusation.correct?
+          @showConfirmDialog(
+            "Import Error",
+            "The accuse entry must have an \"accuser\" property, a \"cards\" property, and a \"correct\" property."
+          )
+          return
+
+        { accuser, cards, correct } = accusation
+
+        if accuser not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{accuser}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        if correct != Boolean(correct)
+            @showConfirmDialog(
+              "Import Error",
+              "The \"correct\" property must be true or false."
+            )
+            return
+
         @recordAccusation(accuser, cards, correct)
+
+      # Commlink entry (if Star Wars edition)
       else if entry.commlink? and setup.variation is "star_wars"
-        { caller, receiver, cards, showed } = entry.commlink
+        commlink = entry.commlink
+        if not commlink.caller? or not commlink.receiver? or not commlink.cards? or not commlink.showed?
+          @showConfirmDialog(
+            "Import Error",
+            "The commlink entry must have a \"caller\" property,  a \"receiver\" property, a \"cards\" property, and a \"showed\" property."
+          )
+          return
+
+        { caller, receiver, cards, showed } = commlink
+
+        if caller not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{caller}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        if receiver not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{receiver}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        if showed != Boolean(showed)
+            @showConfirmDialog(
+              "Import Error",
+              "The \"showed\" property must be true or false."
+            )
+            return
+
         @recordCommlink(caller, receiver, cards, showed)
+
+      # Otherwise, unknown entry
       else
-        console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
+        @showConfirmDialog(
+          "Import Error",
+          "Unsupported imported log entry: #{JSON.stringify(entry)}."
+        )
+        return
     return
 
 
