@@ -49,7 +49,7 @@ class HandDialog extends Component
 
   handleDone: =>
     if @stateIsOk()
-      @props.app.recordHand(@state.playerId, @state.cardIds)
+      @props.onDone(@state.playerId, @state.cardIds)
       @close()
     else
       @props.app.showConfirmDialog("Error", "You must select a player and at least one card")

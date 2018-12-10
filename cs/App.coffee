@@ -125,7 +125,7 @@ haunted_mansion =
   suggestionOrder: [ "ghost", "guest", "room" ]
 
 star_wars =
-  name:       "Clue: Star Wars Edition"
+  name:       "Star Wars"
   rulesId:    "star_wars"
   minPlayers: 3
   maxPlayers: 6
@@ -157,84 +157,318 @@ star_wars =
     tractor:    { name: "Tractor Beam Generator", type: "room"   }
   suggestionOrder: [ "planet", "room", "ship" ]
 
+harry_potter =
+  name:       "Harry Potter"
+  rulesId:    "classic"
+  minPlayers: 3
+  maxPlayers: 6
+  types:
+    suspect: { title: "Suspects", preposition: "", article: ""     }
+    item:    { title: "Items",    preposition: "with ",  article: "a " }
+    room:    { title: "Rooms",    preposition: "in ",    article: "the " }
+  cards:
+    draco:       { name: "Draco Malfoy",              type: "suspect" }
+    crabbe:      { name: "Crabbe & Doyle",            type: "suspect" }
+    lucius:      { name: "Lucius Malfoy",             type: "suspect" }
+    delores:     { name: "Delores Umbridge",          type: "suspect" }
+    peter:       { name: "Peter Pettigrew",           type: "suspect" }
+    bellatrix:   { name: "Bellatrix LeStrange",       type: "suspect" }
+    draught:     { name: "Sleeping Draught",          type: "item"   }
+    cabinet:     { name: "Vanishing Cabinet",         type: "item"   }
+    portkey:     { name: "Portkey",                   type: "item"   }
+    impedimenta: { name: "Impedienta",                type: "item"   }
+    petrifus:    { name: "Petrifus Totalus",          type: "item"   }
+    mandarke:    { name: "Mandrake",                  type: "item"   }
+    hall:        { name: "Great Hall",                type: "room"   }
+    hospital:    { name: "Hospital Wing",             type: "room"   }
+    requirement: { name: "Room of Requirement",       type: "room"   }
+    potions:     { name: "Potions ClassRoom",         type: "room"   }
+    trophy:      { name: "Trophy Room",               type: "room"   }
+    divination:  { name: "Divination Classroom",      type: "room"   }
+    owlry:       { name: "Owlry",                     type: "room"   }
+    library:     { name: "Library",                   type: "room"   }
+    defense:     { name: "Defense Against Dark Arts", type: "room"   }
+  suggestionOrder: [ "suspect", "item", "room" ]
+
 configurations =
   classic:          classic
   master_detective: master_detective
   haunted_mansion:  haunted_mansion
   star_wars:        star_wars
+  harry_potter:     harry_potter
 
 class App extends Component
   constructor: (props) ->
     super(props)
-    @solver =       null
-    @accusationId = 1
-    @commlinkId =   1
-    @suggestionId = 1
-    @state =
-      playerIds:         []
-      configurationId:   "master_detective"
-      log:               []
-      mainMenuAnchor:    null
-      newGameDialogOpen: false
-      logDialogOpen:     false
+    @solver          = null
+    @accusationId    = 1
+    @commlinkId      = 1
+    @suggestionId    = 1
+    @playerIds       = []
+    @configurationId = "master_detective"
+    @log             = []
+    @state           =
+      mainMenuAnchor:     null
+      newGameDialogOpen:  false
+      importDialogOpen:   false
+      logDialogOpen:      false
+      exportDialogOpen:   false
       confirmDialog:
         open:      false
         title:     ''
         question:  ''
         yesAction: null
         noAction:  null
-      handDialogOpen:    false
-      suggestDialogOpen: false
-      showDialogOpen:    false
-      accuseDialogOpen:  false
+      handDialogOpen:     false
+      suggestDialogOpen:  false
+      showDialogOpen:     false
+      accuseDialogOpen:   false
+      commlinkDialogOpen: false
     return
 
-  newGame: (configurationId, playerIds) ->
-    @solver =       new Solver(configurations[configurationId], playerIds)
-    @accusationId = 1
-    @suggestionId = 1
-    @setState({
-      playerIds:       playerIds
-      configurationId: configurationId
-      log:             [@setupLogEntry(configurationId, playerIds)]
-    })
+  setUpNewGame: (configurationId, playerIds) =>
+    @accusationId    = 1
+    @commlinkId      = 1
+    @suggestionId    = 1
+    @playerIds       = playerIds
+    @configurationId = configurationId
+    @log             = []
+
+    @recordSetup(configurationId, playerIds)
     return
 
-  importLog: (imported) ->
-    importedLog = JSON.parse(imported)
-    if importedLog.length == 0
-      @solver = null
+  importLog: (imported) =>
+
+    parsedLog = JSON.parse(imported)
+    if not parsedLog? or not parsedLog[0]? or not parsedLog[0].setup?
+      @showConfirmDialog(
+        "Import Error",
+        "The first entry in the log is not a \"setup\" entry."
+      )
       return
 
-    setup = importedLog[0].setup
-    @newGame(setup.variation, setup.players)
+    setup = parsedLog[0].setup
 
-    for entry in importedLog[1..]
+    # Parse the setup entry
+    if not setup.variation? or not setup.players?
+      @showConfirmDialog(
+        "Import Error",
+        "The setup entry must have a \"variation\" property and a \"players\" property."
+      )
+      return
+
+    { variation, players } = setup
+
+    if not configurations[variation]?
+      @showConfirmDialog(
+        "Import Error",
+        "The variation \"#{variation}\" is not supported. The following variations are supported: #{v for v of configurations}"
+      )
+      return
+
+    configuration = configurations[variation]
+
+    if players.length < configuration.minPlayers or players.length > configuration.maxPlayers
+      @showConfirmDialog(
+        "Import Error",
+        "This variation requires #{configuration.minPlayers} to #{configuration.maxPlayers} players."
+      )
+      return
+
+    if "ANSWER" in players or "Nobody" in players
+      @showConfirmDialog(
+        "Import Error",
+        "The uses of the names \"ANSWER\" and \"Nobody\" are reserved."
+      )
+      return
+
+    configuration = configurations[variation]
+
+    # Process the setup
+    @setUpNewGame(variation, players)
+
+    # Player and card lists for reporting errors
+    playerList = "#{p for p in players}"
+    cardList = "#{c for c of configuration.cards}"
+
+    # Process each entry that follows
+    for entry in parsedLog[1..]
+
+      # Hand entry
       if entry.hand?
-        { player, cards } = entry.hand
+        hand = entry.hand
+        if not hand.player? or not hand.cards?
+          @showConfirmDialog(
+            "Import Error",
+            "The hand entry must have a \"player\" property and a \"cards\" property."
+          )
+          return
+
+        { player, cards } = hand
+
+        if player not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for card in cards
+          if not configuration.cards[card]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{card}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+
         @recordHand(player, cards)
+
+      # Suggest entry
       else if entry.suggest? 
-        { suggester, cards, showed } = entry.suggest
+        suggestion = entry.suggest
+        if not suggestion.suggester? or not suggestion.cards? or not suggestion.showed?
+          @showConfirmDialog(
+            "Import Error",
+            "The suggest entry must have a \"suggester\" property, a \"cards\" property, and a \"showed\" property."
+          )
+          return
+
+        { suggester, cards, showed } = suggestion
+
+        if suggester not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{suggester}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        for s in showed
+          if s not in players
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{s}\" is not in the player list. Valid players are #{playerList}"
+            )
+            return
+
         @recordSuggestion(suggester, cards, showed)
+
+      # Show entry
       else if entry.show?
-        { player, card } = entry.show
-        @recordShow(player, card)
+        show = entry.show
+        if not show.player? or not show.card?
+          @showConfirmDialog(
+            "Import Error",
+            "The show entry must have a \"player\" property, and a \"card\" property."
+          )
+          return
+
+        { player, card } = show
+
+        if player not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        if not configuration.cards[card]?
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{card}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+          )
+          return
+
+        @recordShown(player, card)
+
+      # Accuse entry
       else if entry.accuse?
-        { accuser, cards, outcome } = entry.accuse
-        @recordAccusation(accuser, cards, outcome)
+        accusation = entry.accuse
+        console.log(JSON.stringify(accusation))
+        console.log("")
+        if not accusation.accuser? or not accusation.cards? or not accusation.correct?
+          @showConfirmDialog(
+            "Import Error",
+            "The accuse entry must have an \"accuser\" property, a \"cards\" property, and a \"correct\" property."
+          )
+          return
+
+        { accuser, cards, correct } = accusation
+
+        if accuser not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{accuser}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        if correct != Boolean(correct)
+            @showConfirmDialog(
+              "Import Error",
+              "The \"correct\" property must be true or false."
+            )
+            return
+
+        @recordAccusation(accuser, cards, correct)
+
+      # Commlink entry (if Star Wars edition)
       else if entry.commlink? and setup.variation is "star_wars"
-        { caller, receiver, cards, showed } = entry.commlink
+        commlink = entry.commlink
+        if not commlink.caller? or not commlink.receiver? or not commlink.cards? or not commlink.showed?
+          @showConfirmDialog(
+            "Import Error",
+            "The commlink entry must have a \"caller\" property,  a \"receiver\" property, a \"cards\" property, and a \"showed\" property."
+          )
+          return
+
+        { caller, receiver, cards, showed } = commlink
+
+        if caller not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{caller}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        if receiver not in players
+          @showConfirmDialog(
+            "Import Error",
+            "\"#{receiver}\" is not in the player list. Valid players are #{playerList}"
+          )
+          return
+        for c in cards
+          if not configuration.cards[c]?
+            @showConfirmDialog(
+              "Import Error",
+              "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
+            )
+            return
+        if showed != Boolean(showed)
+            @showConfirmDialog(
+              "Import Error",
+              "The \"showed\" property must be true or false."
+            )
+            return
+
         @recordCommlink(caller, receiver, cards, showed)
+
+      # Otherwise, unknown entry
       else
-        console.log("Imported unsupported log entry: #{JSON.stringify(entry)}")
+        @showConfirmDialog(
+          "Import Error",
+          "Unsupported imported log entry: #{JSON.stringify(entry)}."
+        )
+        return
     return
 
-  setupLogEntry: (configurationId, playerIds) ->
-    { 
-      setup:
-        variation: configurationId
-        players:   playerIds
-    }
 
   # Component launchers
 
@@ -260,13 +494,12 @@ class App extends Component
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
     @setState({ 
-      confirmDialog: {
+      confirmDialog:
         open: true
-        title
-        question
-        yesAction
-        noAction
-      }
+        title: title
+        question: question
+        yesAction: yesAction
+        noAction: noAction
     })
     return
 
@@ -275,7 +508,7 @@ class App extends Component
     return
 
   showSuggestDialog: =>
-    @setState({ suggestDialogOpen: true })    
+    @setState({ suggestDialogOpen: true })
     return
 
   showShowDialog: =>
@@ -292,109 +525,77 @@ class App extends Component
 
   # Solver state updaters
 
-  recordHand: (playerId, cardIds) ->
+  recordSetup: (configurationId, playerIds) =>
+    @solver = new Solver(configurations[configurationId], playerIds)
+    @log.push({ 
+      setup:
+        variation: configurationId
+        players:   playerIds
+    })
+
+  recordHand: (playerId, cardIds) =>
     if @solver?
       @solver.hand(playerId, cardIds) 
-      @logHandEntry(playerId, cardIds)
+      @log.push({
+        hand:
+          player: playerId
+          cards:  cardIds
+      })
     return
 
-  logHandEntry: (playerId, cardIds) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          hand:
-            player: playerId
-            cards:  cardIds
-        }])
-      }
-    )
-    return
-
-  recordSuggestion: (suggesterId, cardIds, showedIds) ->
+  recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @solver?
       id = @suggestionId++
       @solver.suggest(suggesterId, cardIds, showedIds, id)
-      @logSuggestEntry(suggesterId, cardIds, showedIds, id)
+      @log.push({
+        suggest:
+          id:        id
+          suggester: suggesterId
+          cards:     cardIds
+          showed:    showedIds
+      })
     return
 
-  logSuggestEntry: (suggesterId, cardIds, showedIds, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          suggest:
-            id:        id
-            suggester: suggesterId
-            cards:     cardIds
-            showed:    showedIds
-        }])
-      }
-    )
-    return
-
-  recordShown: (playerId, cardId) ->
+  recordShown: (playerId, cardId) =>
     if @solver?
       @solver.show(playerId, cardId)
-      @logShowEntry(playerId, cardId)
+      @log.push({
+        show:
+            player: playerId
+            card:   cardId
+      })
     return
 
-  logShowEntry: (playerId, cardId) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          show:
-              player: playerId
-              card:   cardId
-        }])
-      }
-    )
-    return
-
-  recordAccusation: (accuserId, cardIds, outcome) ->
+  recordAccusation: (accuserId, cardIds, correct) =>
     if @solver?
       id = @accusationId++
-      @solver.accuse(accuserId, cardIds, outcome, id)
-      @logAccuseEntry(accuserId, cardIds, outcome, id)
+      @solver.accuse(accuserId, cardIds, correct, id)
+      @log.push({
+        accuse:
+          id:      id
+          accuser: accuserId
+          cards:   cardIds
+          correct: correct
+      })
     return
 
-  logAccuseEntry: (accuserId, cardIds, outcome, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          accuse:
-            id:      id
-            accuser: accuserId
-            cards:   cardIds
-            outcome: outcome
-        }])
-      }
-    )
-    return
-
-  recordCommlink: (callerId, receiverId, cardIds, showed) ->
+  recordCommlink: (callerId, receiverId, cardIds, showed) =>
     if @solver?
       id = @commlinkId++
       @solver.commlink(callerId, receiverId, cardIds, showed, id)
-      @logCommlinkEntry(callerId, receiverId, cardIds, showed, id)
-    return
-
-  logCommlinkEntry: (callerId, receiverId, cardIds, showed, id) ->
-    @setState((state, props) -> 
-      { 
-        log: state.log.concat([{
-          commlink:
-            id:       id
-            caller:   callerId
-            receiver: receiverId
-            cards:    cardIds
-            showed:   showed
-        }])
-      }
-    )
+      @log.push({
+        commlink:
+          id:       id
+          caller:   callerId
+          receiver: receiverId
+          cards:    cardIds
+          showed:   showed
+      })
     return
 
   render: ->
     <div className="App">
-      <MainView configurationId={@state.configurationId} solver={@solver} app={this} />
+      <MainView configurationId={@configurationId} solver={@solver} onMenu={@showMainMenu} app={this} />
       <MainMenu
         anchor={@state.mainMenuAnchor}
         started={@solver?}
@@ -404,25 +605,27 @@ class App extends Component
       <SetupDialog
         open={@state.newGameDialogOpen}
         configurations={configurations}
+        onDone={@setUpNewGame}
         onClose={() => @setState({ newGameDialogOpen: false })}
         app={this}
       />
       <ImportDialog
         open={@state.importDialogOpen}
         configurations={configurations}
+        onDone={@importLog}
         onClose={() => @setState({ importDialogOpen: false })}
         app={this}
       />
       <LogDialog
         open={@state.logDialogOpen}
-        log={@state.log}
+        log={@log}
         configurations={configurations}
         onClose={() => @setState({ logDialogOpen: false })}
         app={this}
       />
       <ExportDialog
         open={@state.exportDialogOpen}
-        log={@state.log}
+        log={@log}
         onClose={() => @setState({ exportDialogOpen: false })}
         app={this}
       />
@@ -437,36 +640,41 @@ class App extends Component
       />
       <HandDialog
         open={@state.handDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
+        onDone={@recordHand}
         onClose={() => @setState({ handDialogOpen: false })}
         app={this}
       />
       <SuggestDialog
         open={@state.suggestDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
+        onDone={@recordSuggestion}
         onClose={() => @setState({ suggestDialogOpen: false })}
         app={this}
       />
       <ShowDialog
         open={@state.showDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
+        onDone={@recordShown}
         onClose={() => @setState({ showDialogOpen: false })}
         app={this}
       />
       <AccuseDialog
         open={@state.accuseDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
+        onDone={@recordAccusation}
         onClose={() => @setState({ accuseDialogOpen: false })}
         app={this}
       />
       <CommlinkDialog
         open={@state.commlinkDialogOpen}
-        configuration={configurations[@state.configurationId]}
-        players={@state.playerIds}
+        configuration={configurations[@configurationId]}
+        players={@playerIds}
+        onDone={@recordCommlink}
         onClose={() => @setState({ commlinkDialogOpen: false })}
         app={this}
       />
@@ -487,3 +695,4 @@ class App extends Component
 
 
 export default App
+ 

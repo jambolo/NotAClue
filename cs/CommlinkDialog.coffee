@@ -68,7 +68,7 @@ class CommlinkDialog extends Component
   handleDone: =>
     if @stateIsOk()
       cardIds = (cardId for typeId, cardId of @state.cardIds)
-      @props.app.recordCommlink(@state.callerId, @state.receiverId, cardIds, @state.showed)
+      @props.onDone(@state.callerId, @state.receiverId, cardIds, @state.showed)
       @close()
     else
       @props.app.showConfirmDialog("Error", "You must select an caller, a receiver, and one card of each type.")

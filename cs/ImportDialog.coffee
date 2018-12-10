@@ -34,7 +34,7 @@ class ImportDialog extends Component
     return
 
   handleDone: =>
-    @props.app.importLog(@state.imported)
+    @props.onDone(@state.imported)
     @close()
     return
 

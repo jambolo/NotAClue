@@ -125,7 +125,7 @@ class SetupDialog extends Component
     return
 
   handleDone: =>
-    @props.app.newGame(@state.configurationId, @state.playerIds)
+    @props.onDone(@state.configurationId, @state.playerIds)
     @props.onClose()
     return
 
