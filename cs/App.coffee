@@ -238,9 +238,19 @@ class App extends Component
     return
 
   importLog: (imported) =>
+    parsedLog = null
+    try
+      parsedLog = JSON.parse(imported)
+      
+    catch e
+      console.log(JSON.stringify(e, 2))
+      @showConfirmDialog(
+        "Import Error",
+        "The input is not valid JSON."
+      )
+      return
 
-    parsedLog = JSON.parse(imported)
-    if not parsedLog? or not parsedLog[0]? or not parsedLog[0].setup?
+    if not parsedLog? or parsedLog not instanceof Array or not parsedLog[0]? or not parsedLog[0].setup?
       @showConfirmDialog(
         "Import Error",
         "The first entry in the log is not a \"setup\" entry."
@@ -268,13 +278,12 @@ class App extends Component
 
     configuration = configurations[variation]
 
-    if players.length < configuration.minPlayers or players.length > configuration.maxPlayers
+    if players not instanceof Array or players.length < configuration.minPlayers or players.length > configuration.maxPlayers
       @showConfirmDialog(
         "Import Error",
         "This variation requires #{configuration.minPlayers} to #{configuration.maxPlayers} players."
       )
       return
-
     if "ANSWER" in players or "Nobody" in players
       @showConfirmDialog(
         "Import Error",
@@ -309,7 +318,13 @@ class App extends Component
         if player not in players
           @showConfirmDialog(
             "Import Error",
-            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+            "\"#{player}\" is not in the list of players. Valid players are #{playerList}"
+          )
+          return
+        if cards not instanceof Array
+          @showConfirmDialog(
+            "Import Error",
+            "The hand.cards property must be an array of cards."
           )
           return
         for card in cards
@@ -337,7 +352,13 @@ class App extends Component
         if suggester not in players
           @showConfirmDialog(
             "Import Error",
-            "\"#{suggester}\" is not in the player list. Valid players are #{playerList}"
+            "\"#{suggester}\" is not in the list of players. Valid players are #{playerList}"
+          )
+          return
+        if cards not instanceof Array
+          @showConfirmDialog(
+            "Import Error",
+            "The suggest.cards property must be an array of cards."
           )
           return
         for c in cards
@@ -347,11 +368,17 @@ class App extends Component
               "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
             )
             return
+        if showed not instanceof Array
+          @showConfirmDialog(
+            "Import Error",
+            "The suggest.showed property must be an array of players."
+          )
+          return
         for s in showed
           if s not in players
             @showConfirmDialog(
               "Import Error",
-              "\"#{s}\" is not in the player list. Valid players are #{playerList}"
+              "\"#{s}\" is not in the list of players. Valid players are #{playerList}"
             )
             return
 
@@ -372,7 +399,7 @@ class App extends Component
         if player not in players
           @showConfirmDialog(
             "Import Error",
-            "\"#{player}\" is not in the player list. Valid players are #{playerList}"
+            "\"#{player}\" is not in the list of players. Valid players are #{playerList}"
           )
           return
         if not configuration.cards[card]?
@@ -404,6 +431,12 @@ class App extends Component
             "\"#{accuser}\" is not in the player list. Valid players are #{playerList}"
           )
           return
+        if cards not instanceof Array
+          @showConfirmDialog(
+            "Import Error",
+            "The accuse.cards property must be an array of cards."
+          )
+          return
         for c in cards
           if not configuration.cards[c]?
             @showConfirmDialog(
@@ -411,10 +444,10 @@ class App extends Component
               "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
             )
             return
-        if correct != Boolean(correct)
+        if typeof(correct) != typeof(true)
             @showConfirmDialog(
               "Import Error",
-              "The \"correct\" property must be true or false."
+              "The accuse.correct property must be true or false."
             )
             return
 
@@ -444,6 +477,12 @@ class App extends Component
             "\"#{receiver}\" is not in the player list. Valid players are #{playerList}"
           )
           return
+        if cards not instanceof Array
+          @showConfirmDialog(
+            "Import Error",
+            "The commlink.cards property must be an array of cards."
+          )
+          return
         for c in cards
           if not configuration.cards[c]?
             @showConfirmDialog(
@@ -451,10 +490,10 @@ class App extends Component
               "\"#{c}\" is not in a valid card for this variation. Valid cards are #{cardList}"
             )
             return
-        if showed != Boolean(showed)
+        if typeof(showed) != typeof(true)
             @showConfirmDialog(
               "Import Error",
-              "The \"showed\" property must be true or false."
+              "The commlink.showed property must be true or false."
             )
             return
 
