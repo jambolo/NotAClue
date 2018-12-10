@@ -4,7 +4,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Paper from '@material-ui/core/Paper';
+import Input from '@material-ui/core/Input';
 import React from 'react';
 import Typography from '@material-ui/core/Typography'
 `
@@ -15,9 +15,7 @@ ExportDialog = (props) ->
       <DialogTitle id="form-dialog-title"> Export </DialogTitle>
       <DialogContent>
         <Typography component="h6"> Copy the JSON-formatted text below: </Typography>
-        <Paper>
-          <Typography component="pre"> {JSON.stringify(log)} </Typography>
-        </Paper>        
+        <Input autofocus={true} fullwidth={true} multiline={true} value={JSON.stringify(log)} />        
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={onClose}> Done </Button>
