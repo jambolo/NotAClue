@@ -15,14 +15,17 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 `
 ConfigurationChoices = (props) ->
-  <RadioGroup row name="variations" value={props.configuration} onChange={props.onChange}>
+  { choice, configurations, numPlayers, onChange } = props
+
+  <RadioGroup row name="variations" value={choice} onChange={onChange}>
     {
-      for key, value of props.configurations
+      for id, configuration of configurations
         <FormControlLabel 
-          key={key} 
-          value={key} 
+          key={id} 
+          value={id} 
           control={<Radio /> } 
-          label={value.name} 
+          label={configuration.name}
+          disabled={configuration.maxPlayers < numPlayers}
         /> 
     }
   </RadioGroup>
@@ -31,8 +34,9 @@ ConfigurationChooser = (props) ->
   <FormControl component="fieldset">
     <FormLabel component="legend"><Typography variant="h6">Select a variation:</Typography></FormLabel>
     <ConfigurationChoices
-      configuration={props.configuration}
+      choice={props.choice}
       configurations={props.configurations}
+      numPlayers={props.numPlayers}
       onChange={(event) -> props.onChange(event.target.value)}
     />
   </FormControl>
@@ -146,8 +150,9 @@ class SetupDialog extends Component
       <DialogTitle id="form-dialog-title">New Game</DialogTitle>
       <DialogContent>
         <ConfigurationChooser
-          configuration={@state.configurationId}
+          choice={@state.configurationId}
           configurations={configurations}
+          numPlayers={numPlayers}
           onChange={@handleChangeConfiguration}
         />
         <Divider />
