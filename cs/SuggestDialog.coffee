@@ -15,7 +15,7 @@ import Typography from '@material-ui/core/Typography'
 
 class SuggestDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       suggesterId:   null
       cardIds:       {}
@@ -24,96 +24,77 @@ class SuggestDialog extends Component
     return
 
   close: () ->
-    @setState({ suggesterId: null, cardIds: {}, showedIds: [], didNotShowIds: [] })
+    @setState { suggesterId: null, cardIds: {}, showedIds: [], didNotShowIds: [] }
     @props.onClose()
     return
 
   stateIsOkMaster: ->
-    cardCount = (key for key of @state.cardIds).length
+    cardCount = Object.keys(@state.cardIds).length
     return @state.suggesterId? and cardCount == 3 and @state.showedIds.length <= 3
 
   stateIsOkClassic: ->
-    cardCount = (key for key of @state.cardIds).length
+    cardCount = Object.keys(@state.cardIds).length
     return @state.suggesterId? and cardCount == 3
 
-  stateIsOk: ->
-    if @props.configuration.rulesId is "master"
-      @stateIsOkMaster()
-    else
-      @stateIsOkClassic()
+  stateIsOk: -> if @props.configuration.rulesId is "master" then @stateIsOkMaster() else @stateIsOkClassic()
 
   handleClose: =>
     @close()
     return
 
   handleChangeSuggesterId: (playerId) =>
-    @setState({ suggesterId: playerId })
+    @setState { suggesterId: playerId }
     return
 
   handleChangeCards: (typeId, cardId) =>
-    @setState((state, props) ->
+    @setState (state, props) ->
       newCardIds = Object.assign({}, state.cardIds)
       newCardIds[typeId] = cardId
-      { cardIds: newCardIds }
-    )
+      return { cardIds: newCardIds }
     return
 
   handleChangeShowedIdsMaster: (playerId, selected) =>
     if selected
-      @setState((state, props) ->
-        if playerId not in state.showedIds
-          { showedIds : state.showedIds.concat([playerId]) }
-        else
-          null
-      ) 
+      @setState (state, props) ->
+        return if playerId not in state.showedIds then { showedIds : state.showedIds.concat([playerId]) } else null
     else
-      @setState((state, props) ->
-        if playerId in state.showedIds
-          { showedIds : (id for id in state.showedIds when id isnt playerId) }
-        else
-          null
-      )
+      @setState (state, props) ->
+        return if playerId in state.showedIds then { showedIds : (id for id in state.showedIds when id isnt playerId) } else null
     return
 
   handleChangeShowedIdsClassic: (playerId) =>
-    @setState({ showedIds: [playerId] })
+    @setState { showedIds: [playerId] }
     return
 
   handleChangeDidNotShowIdsClassic: (playerId, selected) =>
     if selected
-      @setState((state, props) ->
-        if playerId not in state.didNotShowIds 
-          { didNotShowIds : state.didNotShowIds.concat([playerId]) } 
-        else
-          null
-      ) 
+      @setState (state, props) ->
+        return if playerId not in state.didNotShowIds then { didNotShowIds : state.didNotShowIds.concat([playerId]) } else null
     else
-      @setState((state, props) ->
-        if playerId in state.didNotShowIds 
-          { didNotShowIds : (id for id in state.didNotShowIds when id isnt playerId) } 
-        else 
-          null
-      )
+      @setState (state, props) ->
+        return if playerId in state.didNotShowIds then { didNotShowIds : (id for id in state.didNotShowIds when id isnt playerId) }  else null
     return
 
   handleDoneMaster: =>
     if not @stateIsOkMaster()
       @props.app.showConfirmDialog(
         "Error",
-       "You must select a suggester, 3 cards, and up to 3 players who showed cards."
+        "You must select a suggester, 3 cards, and up to 3 players who showed cards."
       )
       return
-    cardIds = (cardId for typeId, cardId of @state.cardIds)
+    cardIds = Object.values(@state.cardIds)
     if @state.showedIds.length == 0
-      @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed any cards?",
+      @props.app.showConfirmDialog(
+        "Please confirm",
+        "Are you sure that nobody showed any cards?",
         () =>       
-          @props.onDone(@state.suggesterId, cardIds, @state.showedIds)
+          @props.onDone @state.suggesterId, cardIds, @state.showedIds
           @close()
         ,
         () -> {}
       )
       return
-    @props.onDone(@state.suggesterId, cardIds, @state.showedIds)
+    @props.onDone @state.suggesterId, cardIds, @state.showedIds
     @close()
     return
 
@@ -124,9 +105,11 @@ class SuggestDialog extends Component
         "You must select a suggester, 3 cards, and up to 3 players who showed cards."
       )
       return
-    cardIds = (cardId for typeId, cardId of @state.cardIds)
+    cardIds = Object.values(@state.cardIds)
     if not @state.showedIds[0]?
-      @props.app.showConfirmDialog("Please confirm", "Are you sure that nobody showed a card?",
+      @props.app.showConfirmDialog(
+        "Please confirm",
+        "Are you sure that nobody showed a card?",
         () =>       
           @props.onDone(@state.suggesterId, cardIds, [])
           @close()
@@ -134,7 +117,7 @@ class SuggestDialog extends Component
         () -> {}
       )
       return
-    @props.onDone(@state.suggesterId, cardIds, @state.didNotShowIds.concat(@state.showedIds))
+    @props.onDone @state.suggesterId, cardIds, @state.didNotShowIds.concat(@state.showedIds)
     @close()
     return
 

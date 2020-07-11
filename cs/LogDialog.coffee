@@ -26,8 +26,7 @@ transcribedList = (list) ->
       string += " and " + list[1]
   return string
 
-playerList = (playerIds) ->
-  if playerIds.length > 0 then transcribedList(playerIds) else "Nobody"
+playerList = (playerIds) -> if playerIds.length > 0 then transcribedList(playerIds) else "Nobody"
 
 cardList = (cardIds, configuration) ->
   cards = configuration.cards
@@ -47,21 +46,19 @@ suggestedCardsClause = (cardIds, configuration) ->
 
 class LogDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @configuration = null
     return
 
-  describeSetup: (info) ->
-    "Playing #{@configuration.name} with #{playerList(info.players)}."
+  describeSetup: (info) -> "Playing #{@configuration.name} with #{playerList(info.players)}."
 
-  describeHand: (info) ->
-    "#{info.player} has #{cardList(info.cards, @configuration)}."
+  describeHand: (info) -> "#{info.player} has #{cardList(info.cards, @configuration)}."
 
   describeSuggest: (info) ->
     if @configuration.rules is "master"
-      @describeSuggestMaster(info)
+      @describeSuggestMaster info
     else
-      @describeSuggestClassic(info)
+      @describeSuggestClassic info
 
   describeSuggestMaster: (info) ->
     "#{info.suggester} suggested: #{suggestedCardsClause(info.cards, @configuration)}.
@@ -79,7 +76,7 @@ class LogDialog extends Component
 
   describeShow: (info) ->
     cards = @configuration.cards
-    "#{info.player} showed #{cardPhrase(cards[info.card], @configuration, false)}."
+    return "#{info.player} showed #{cardPhrase(cards[info.card], @configuration, false)}."
 
   describeAccuse: (info) ->
     "#{info.accuser} made an accusation: #{suggestedCardsClause(info.cards, @configuration)}.
@@ -91,19 +88,19 @@ class LogDialog extends Component
 
   describeEntry: (entry) ->
     if entry.setup?
-      @describeSetup(entry.setup)
+      @describeSetup entry.setup
     else if entry.hand?
-      @describeHand(entry.hand)
+      @describeHand entry.hand
     else if entry.suggest?
-      @describeSuggest(entry.suggest)
+      @describeSuggest entry.suggest
     else if entry.show?
-      @describeShow(entry.show)
+      @describeShow entry.show
     else if entry.accuse?
-      @describeAccuse(entry.accuse)
+      @describeAccuse entry.accuse
     else if entry.commlink?
-      @describeCommlink(entry.commlink)
+      @describeCommlink entry.commlink
     else
-      alert("Unknown log entry")
+      alert "Unknown log entry"
 
   render: ->
     { open, log, configurations, onClose } = @props

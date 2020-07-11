@@ -35,22 +35,22 @@ CardChoices = (props) ->
 
 class PerCategoryCardChooser extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       currentTab: 0
     return
 
   handleChangeTab: (event, currentTab) =>
-    @setState({ currentTab });
+    @setState { currentTab }
     return
 
   makeChangeEventHandler: (typeId) =>
     (event) =>
-      @props.onChange(typeId, event.target.value)
+      @props.onChange typeId, event.target.value
 
   render: ->
     { value, cards, types } = @props
-    tabIds = (id for id of types)
+    tabIds = Object.keys(types)
     tabIndex = if @state.currentTab >= 0 and @state.currentTab < tabIds.length then @state.currentTab else 0
     tabId = tabIds[tabIndex]
     

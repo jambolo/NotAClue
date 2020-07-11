@@ -25,18 +25,18 @@ CardChoices = (props) ->
 
 class CardChooser extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       currentTab: 0
     return
 
   handleChangeTab: (event, currentTab) =>
-    @setState({ currentTab });
+    @setState { currentTab }
     return
 
   render: ->
     { value, cards, types } = @props
-    tabIds = (id for id of types)
+    tabIds = Object.keys(types)
     tabIndex = if @state.currentTab >= 0 and @state.currentTab < tabIds.length then @state.currentTab else 0
     tabId = tabIds[tabIndex]
     <div>

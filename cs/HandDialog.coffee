@@ -14,45 +14,54 @@ import Typography from '@material-ui/core/Typography'
 
 class HandDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       playerId: null
       cardIds: []
     return
 
   close: ->
-    @setState({ playerId: null, cardIds:[] })
+    @setState {
+      playerId: null
+      cardIds:[]
+    }
     @props.onClose()
     return
 
-  stateIsOk: ->
-    @state.playerId? and @state.cardIds.length > 0
+  stateIsOk: -> @state.playerId? and @state.cardIds.length > 0
 
   handleClose: =>
     @close()
     return
 
   handleChangePlayer: (playerId) =>
-    @setState({ playerId })
+    @setState { playerId }
     return
 
   handleChangeCards: (cardId, selected) =>
     if selected
-      @setState((state, props) -> 
-        if cardId not in state.cardIds then { cardIds : state.cardIds.concat([cardId]) } else null
-      ) 
+      @setState (state, props) -> 
+        if cardId not in state.cardIds
+          return { cardIds : state.cardIds.concat([cardId]) }
+        else
+          return null
     else
-      @setState((state, props) -> 
-        if cardId in state.cardIds then { cardIds : (id for id in state.cardIds when id isnt cardId) } else null
-      )
+      @setState (state, props) -> 
+        if cardId in state.cardIds
+         return { cardIds : (id for id in state.cardIds when id isnt cardId) }
+        else
+         return null
     return
 
   handleDone: =>
     if @stateIsOk()
-      @props.onDone(@state.playerId, @state.cardIds)
+      @props.onDone @state.playerId, @state.cardIds
       @close()
     else
-      @props.app.showConfirmDialog("Error", "You must select a player and at least one card")
+      @props.app.showConfirmDialog(
+        "Error",
+        "You must select a player and at least one card"
+      )
     return
 
   handleCancel: =>

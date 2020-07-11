@@ -18,7 +18,7 @@ import Typography from '@material-ui/core/Typography'
 
 class AccuseDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       accuserId: null
       cardIds:   {}
@@ -26,32 +26,34 @@ class AccuseDialog extends Component
     return
 
   close: ->
-    @setState({ accuserId: null, cardIds: {}, correct: null })
+    @setState
+      accuserId: null
+      cardIds: {}
+      correct: null
     @props.onClose()
     return
 
   stateIsOk: ->
-    cardCount = (key for key of @state.cardIds).length
-    @state.accuserId? and cardCount == 3 and @state.correct?
+    cardCount = Object.keys(@state.cardIds).length
+    return @state.accuserId? and cardCount == 3 and @state.correct?
 
   handleClose: =>
     @close()
     return
 
   handleChangeAccuserId: (playerId) =>
-    @setState({ accuserId: playerId })
+    @setState { accuserId: playerId }
     return
 
   handleChangeCards: (typeId, cardId) =>
-    @setState((state, props) ->
+    @setState (state, props) ->
       newCardIds = Object.assign({}, state.cardIds)
       newCardIds[typeId] = cardId
-      { cardIds: newCardIds }
-    )
+      return { cardIds: newCardIds }
     return
 
   handleChangeOutcome: (event) =>
-    @setState({ correct: event.target.value })
+    @setState { correct: event.target.value }
     return
 
   handleCancel: =>
@@ -60,11 +62,11 @@ class AccuseDialog extends Component
 
   handleDone: =>
     if @stateIsOk()
-      cardIds = (cardId for typeId, cardId of @state.cardIds)
-      @props.onDone(@state.accuserId, cardIds, @state.correct == "yes")
+      cardIds = Object.values(@state.cardIds)
+      @props.onDone @state.accuserId, cardIds, @state.correct == "yes"
       @close()
     else
-      @props.app.showConfirmDialog("Error", "You must select an accuser, 3 cards, and the outcome.")
+      @props.app.showConfirmDialog "Error", "You must select an accuser, 3 cards, and the outcome."
     return
 
   render: ->

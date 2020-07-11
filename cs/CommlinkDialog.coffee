@@ -28,7 +28,7 @@ ShowedChooser = (props) ->
 
 class CommlinkDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       callerId:   null
       receiverId: null
@@ -37,38 +37,41 @@ class CommlinkDialog extends Component
     return
 
   close: ->
-    @setState({ callerId: null, receiverId: null, cardIds: {}, showed: false })
+    @setState
+      callerId:   null
+      receiverId: null
+      cardIds:    {}
+      showed:     false
     @props.onClose()
     return
 
   stateIsOk: ->
-    cardCount = (key for key of @state.cardIds).length
-    @state.callerId? and @state.receiverId? and cardCount == 3
+    cardCount = Object.keys(@state.cardIds).length
+    return @state.callerId? and @state.receiverId? and cardCount == 3
 
   handleChangeCallerId: (playerId) =>
-    @setState({ callerId: playerId })
+    @setState { callerId: playerId }
     return
 
   handleChangeSubjectId: (playerId) =>
-    @setState({ receiverId: playerId })
+    @setState { receiverId: playerId }
     return
 
   handleChangeCards: (typeId, cardId) =>
-    @setState((state, props) ->
+    @setState (state, props) ->
       newCardIds = Object.assign({}, state.cardIds)
       newCardIds[typeId] = cardId
-      { cardIds: newCardIds }
-    )
+      return { cardIds: newCardIds }
     return
 
   handleChangeShowed: (event) =>
-    @setState({ showed: event.target.value is "yes" })
+    @setState { showed: event.target.value is "yes" }
     return
 
   handleDone: =>
     if @stateIsOk()
-      cardIds = (cardId for typeId, cardId of @state.cardIds)
-      @props.onDone(@state.callerId, @state.receiverId, cardIds, @state.showed)
+      cardIds = Object.values(@state.cardIds)
+      @props.onDone @state.callerId, @state.receiverId, cardIds, @state.showed
       @close()
     else
       @props.app.showConfirmDialog("Error", "You must select an caller, a receiver, and one card of each type.")

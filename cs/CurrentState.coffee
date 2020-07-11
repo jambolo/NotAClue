@@ -9,11 +9,12 @@ Yes = (props) ->
     {if props.isAnswer then "star" else "check_box"}
   </Icon>
 
-No = () ->
-  ""
+No = () -> ""
 
 Maybe = () ->
-  <Icon color="disabled">indeterminate_check_box</Icon>
+  <Icon color="disabled">
+    indeterminate_check_box
+  </Icon>
 
 StateElement = (props) ->
   { card, player } = props

@@ -11,13 +11,13 @@ import Typography from '@material-ui/core/Typography'
 
 class ImportDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state = 
       imported: ""
     return
 
   close: ->
-    @setState({ imported: "" })   
+    @setState { imported: "" }  
     @props.onClose()
     return
 
@@ -26,7 +26,7 @@ class ImportDialog extends Component
     return
 
   handleChange: (event) =>
-    @setState({ imported: event.target.value })
+    @setState { imported: event.target.value }
     return
 
   handleCancel: =>
@@ -34,7 +34,7 @@ class ImportDialog extends Component
     return
 
   handleDone: =>
-    @props.onDone(@state.imported)
+    @props.onDone @state.imported
     @close()
     return
 

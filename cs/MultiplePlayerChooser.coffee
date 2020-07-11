@@ -8,7 +8,8 @@ import React, {Component} from 'react';
 class MultiplePlayerChooser extends Component
 
   makeChangeHandler: (id) =>
-    (event) => @props.onChange(id, event.target.checked)
+    (event) =>
+      @props.onChange id, event.target.checked
 
   render:->
     { value, players, excluded } = @props

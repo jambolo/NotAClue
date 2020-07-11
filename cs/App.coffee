@@ -199,7 +199,7 @@ configurations =
 
 class App extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @solver          = null
     @accusationId    = 1
     @commlinkId      = 1
@@ -234,7 +234,7 @@ class App extends Component
     @configurationId = configurationId
     @log             = []
 
-    @recordSetup(configurationId, playerIds)
+    @recordSetup configurationId, playerIds
     return
 
   importLog: (imported) =>
@@ -272,7 +272,7 @@ class App extends Component
     if not configurations[variation]?
       @showConfirmDialog(
         "Import Error",
-        "The variation \"#{variation}\" is not supported. The following variations are supported: #{v for v of configurations}"
+        "The variation \"#{variation}\" is not supported. The following variations are supported: #{Object.keys(configurations)}"
       )
       return
 
@@ -294,11 +294,11 @@ class App extends Component
     configuration = configurations[variation]
 
     # Process the setup
-    @setUpNewGame(variation, players)
+    @setUpNewGame variation, players
 
     # Player and card lists for reporting errors
-    playerList = "#{p for p in players}"
-    cardList = "#{c for c of configuration.cards}"
+    playerList = "#{players}"
+    cardList = "#{Object.keys(configuration.cards)}"
 
     # Process each entry that follows
     for entry in parsedLog[1..]
@@ -335,7 +335,7 @@ class App extends Component
             )
             return
 
-        @recordHand(player, cards)
+        @recordHand player, cards
 
       # Suggest entry
       else if entry.suggest? 
@@ -382,7 +382,7 @@ class App extends Component
             )
             return
 
-        @recordSuggestion(suggester, cards, showed)
+        @recordSuggestion suggester, cards, showed
 
       # Show entry
       else if entry.show?
@@ -409,13 +409,13 @@ class App extends Component
           )
           return
 
-        @recordShown(player, card)
+        @recordShown player, card
 
       # Accuse entry
       else if entry.accuse?
         accusation = entry.accuse
-        console.log(JSON.stringify(accusation))
-        console.log("")
+        console.log JSON.stringify(accusation)
+        console.log ""
         if not accusation.accuser? or not accusation.cards? or not accusation.correct?
           @showConfirmDialog(
             "Import Error",
@@ -451,7 +451,7 @@ class App extends Component
             )
             return
 
-        @recordAccusation(accuser, cards, correct)
+        @recordAccusation accuser, cards, correct
 
       # Commlink entry (if Star Wars edition)
       else if entry.commlink? and setup.variation is "star_wars"
@@ -497,7 +497,7 @@ class App extends Component
             )
             return
 
-        @recordCommlink(caller, receiver, cards, showed)
+        @recordCommlink caller, receiver, cards, showed
 
       # Otherwise, unknown entry
       else
@@ -512,124 +512,117 @@ class App extends Component
   # Component launchers
 
   showMainMenu: (anchor) =>
-    @setState({ mainMenuAnchor: anchor })
+    @setState { mainMenuAnchor: anchor }
     return
 
   showNewGameDialog: =>
-    @setState({ newGameDialogOpen: true })
+    @setState { newGameDialogOpen: true }
     return
 
   showImportDialog: =>
-    @setState({ importDialogOpen: true })
+    @setState { importDialogOpen: true }
     return
 
   showLog: =>
-    @setState({ logDialogOpen: true })
+    @setState { logDialogOpen: true }
     return
 
   showExportDialog: =>
-    @setState({ exportDialogOpen: true })
+    @setState { exportDialogOpen: true }
     return
 
   showConfirmDialog: (title, question, yesAction, noAction) =>
-    @setState({ 
+    @setState 
       confirmDialog:
         open: true
         title: title
         question: question
         yesAction: yesAction
         noAction: noAction
-    })
     return
 
   showHandDialog: =>
-    @setState({ handDialogOpen: true })
+    @setState { handDialogOpen: true }
     return
 
   showSuggestDialog: =>
-    @setState({ suggestDialogOpen: true })
+    @setState { suggestDialogOpen: true }
     return
 
   showShowDialog: =>
-    @setState({ showDialogOpen: true })
+    @setState { showDialogOpen: true }
     return
 
   showAccuseDialog: =>
-    @setState({ accuseDialogOpen: true })
+    @setState { accuseDialogOpen: true }
     return
 
   showCommlinkDialog: =>
-    @setState({ commlinkDialogOpen: true })
+    @setState { commlinkDialogOpen: true }
     return
 
   # Solver state updaters
 
   recordSetup: (configurationId, playerIds) =>
     @solver = new Solver(configurations[configurationId], playerIds)
-    @log.push({ 
+    @log.push 
       setup:
         variation: configurationId
         players:   playerIds
-    })
 
   recordHand: (playerId, cardIds) =>
     if @solver?
-      @solver.hand(playerId, cardIds) 
-      @log.push({
+      @solver.hand playerId, cardIds
+      @log.push
         hand:
           player: playerId
           cards:  cardIds
-      })
     return
 
   recordSuggestion: (suggesterId, cardIds, showedIds) =>
     if @solver?
       id = @suggestionId++
-      @solver.suggest(suggesterId, cardIds, showedIds, id)
-      @log.push({
+      @solver.suggest suggesterId, cardIds, showedIds, id
+      @log.push
         suggest:
           id:        id
           suggester: suggesterId
           cards:     cardIds
           showed:    showedIds
-      })
     return
 
   recordShown: (playerId, cardId) =>
     if @solver?
-      @solver.show(playerId, cardId)
-      @log.push({
+      @solver.show playerId, cardId
+      @log.push
         show:
             player: playerId
             card:   cardId
-      })
     return
 
   recordAccusation: (accuserId, cardIds, correct) =>
     if @solver?
       id = @accusationId++
-      @solver.accuse(accuserId, cardIds, correct, id)
-      @log.push({
+      @solver.accuse accuserId, cardIds, correct, id
+      @log.push
         accuse:
           id:      id
           accuser: accuserId
           cards:   cardIds
           correct: correct
-      })
     return
 
   recordCommlink: (callerId, receiverId, cardIds, showed) =>
     if @solver?
       id = @commlinkId++
-      @solver.commlink(callerId, receiverId, cardIds, showed, id)
-      @log.push({
+      @solver.commlink callerId, receiverId, cardIds, showed, id
+      @log.push
         commlink:
           id:       id
           caller:   callerId
           receiver: receiverId
           cards:    cardIds
           showed:   showed
-      })
     return
 
   render: ->
@@ -722,14 +715,14 @@ class App extends Component
   # Callbacks
   
   handleConfirmDialogClose: =>
-    @setState({ 
+    @setState { 
       confirmDialog: 
         open:      false
         title:     ""
         question:  ""
         yesAction: null
         noAction:  null 
-    })
+    }
     return
 
 

@@ -14,14 +14,16 @@ import Typography from '@material-ui/core/Typography'
 
 class ShowDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
       playerId: null
-      cardId: null
+      cardId:   null
     return
 
   close: ->
-    @setState({ playerId: null, cardId: null })
+    @setState
+      playerId: null
+      cardId:   null
     @props.onClose()
     return
 
@@ -33,11 +35,11 @@ class ShowDialog extends Component
     return
 
   handleChangePlayer: (playerId) =>
-    @setState({ playerId })
+    @setState { playerId }
     return
 
   handleChangeCard: (cardId) =>
-    @setState({ cardId })
+    @setState { cardId }
     return
 
   handleCancel: =>
@@ -46,9 +48,12 @@ class ShowDialog extends Component
     
   handleDone: =>
     if not @stateIsOk()
-      @props.app.showConfirmDialog("Error", "You must select a player and a card")
+      @props.app.showConfirmDialog(
+        "Error",
+        "You must select a player and a card"
+      )
       return
-    @props.onDone(@state.playerId, @state.cardId)
+    @props.onDone @state.playerId, @state.cardId
     @close()
     return
 

@@ -39,13 +39,13 @@ ConfigurationChooser = (props) ->
 
 class AddPlayerInput extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state = 
-      playerId: ''
+      playerId: ""
     return
 
   handleChange: (event) =>
-    @setState({ playerId: event.target.value })
+    @setState { playerId: event.target.value }
     return
 
   handleKeyDown: (event) =>
@@ -54,12 +54,15 @@ class AddPlayerInput extends Component
     return
 
   handleAddPlayer: =>
-    if @state.playerId != ""
-      if @state.playerId != "ANSWER" and @state.playerId not in @props.players
-        @props.onAddPlayer(@state.playerId)
+    if @state.playerId isnt ""
+      if @state.playerId isnt "ANSWER" and @state.playerId not in @props.players
+        @props.onAddPlayer @state.playerId
       else
-        @props.app.showConfirmDialog("Error", "A player's name must be unique and it cannot be ANSWER.")
-      @setState({ playerId: '' })
+        @props.app.showConfirmDialog(
+          "Error",
+          "A player's name must be unique and it cannot be ANSWER."
+        )
+      @setState { playerId: "" }
     return
 
   render: ->
@@ -102,9 +105,9 @@ AddPlayers = (props) ->
 
 class SetupDialog extends Component
   constructor: (props) ->
-    super(props)
+    super props
     @state =
-      playerIds: []
+      playerIds:       []
       configurationId: null
     return
 
@@ -113,19 +116,19 @@ class SetupDialog extends Component
     return
 
   handleAddPlayer: (playerId) =>
-    @setState( (state, props) -> { playerIds: state.playerIds.concat([playerId]) } )
+    @setState (state, props) -> { playerIds: state.playerIds.concat([playerId]) }
     return
 
   handleClearPlayers: =>
-    @setState({ playerIds: [] })
+    @setState { playerIds: [] }
     return
 
   handleChangeConfiguration: (configurationId) =>
-    @setState({ configurationId })
+    @setState { configurationId }
     return
 
   handleDone: =>
-    @props.onDone(@state.configurationId, @state.playerIds)
+    @props.onDone @state.configurationId, @state.playerIds
     @props.onClose()
     return
 
